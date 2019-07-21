@@ -1,7 +1,20 @@
 #include <stdio.h>
 #include "SDL.h"
+#include "quickjs-libc.h"
+
+#include "./generated/js-entrypoint.c"
 
 int main(int argc, char* argv[]) {
+    JSRuntime *rt;
+    JSContext *ctx;
+    rt = JS_NewRuntime();
+    ctx = JS_NewContextRaw(rt);
+    JS_AddIntrinsicBaseObjects(ctx);
+    js_std_add_helpers(ctx, argc, argv);
+    js_std_eval_binary(ctx, entrypoint, entrypoint_size, 0);
+    JS_FreeContext(ctx);
+    JS_FreeRuntime(rt);
+
     SDL_Window* window;
     SDL_Init(SDL_INIT_VIDEO);
     window = SDL_CreateWindow(
