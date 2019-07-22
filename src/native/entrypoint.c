@@ -2,7 +2,7 @@
 #include "SDL.h"
 #include "quickjs-libc.h"
 
-#include "./generated/js-entrypoint.c"
+#include "../generated/js-entrypoint.c"
 
 int main(int argc, char* argv[]) {
     JSRuntime *rt;

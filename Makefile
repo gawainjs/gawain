@@ -1,7 +1,7 @@
 DIST = dist
 OBJDIR = .obj
 GENERATED = src/generated
-BIN = $(DIST)/hello
+BIN = $(DIST)/app
 
 .PHONY: all
 all: $(GENERATED)/js-entrypoint.c $(BIN)
@@ -18,6 +18,6 @@ $(BIN): $(OBJDIR)/entrypoint.o
 	mkdir -p $(DIST)
 	$(CC) `sdl2-config --libs` -L/usr/local/lib/quickjs -lquickjs -o $@ $^
 
-$(OBJDIR)/%.o: src/%.c
+$(OBJDIR)/%.o: src/native/%.c
 	@mkdir -p $(OBJDIR)
 	$(CC) `sdl2-config --cflags` -I/usr/local/include/quickjs -c -o $@ $<
