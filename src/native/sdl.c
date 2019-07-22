@@ -1,6 +1,8 @@
 #include "SDL.h"
 #include "quickjs.h"
 
+#define countof(x) (sizeof(x) / sizeof((x)[0]))
+
 static JSValue js_sdl_SDL_Init(
     JSContext *ctx,
     JSValueConst this_val,
