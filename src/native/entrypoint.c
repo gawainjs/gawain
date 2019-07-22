@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
     JS_FreeRuntime(rt);
 
     SDL_Window* window;
-    SDL_Init(SDL_INIT_VIDEO);
+    // SDL_Init(SDL_INIT_VIDEO);
     window = SDL_CreateWindow(
         "Hello",
         SDL_WINDOWPOS_UNDEFINED,
