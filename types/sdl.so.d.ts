@@ -1,6 +1,5 @@
 declare module 'sdl.so' {
-    type Brand<K, T> = K & { __brand: T }
-    export type SDL_Window = Brand<symbol, 'SDL_Window'>;
+    export type SDL_Window = number;
     export const SDL_INIT_VIDEO: number;
     export const SDL_WINDOWPOS_UNDEFINED: number;
     export const SDL_WINDOW_OPENGL: number;

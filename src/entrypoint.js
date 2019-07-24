@@ -8,7 +8,7 @@ import {
 
 console.log('hello, world!');
 SDL_Init(SDL_INIT_VIDEO);
-const window = SDL_CreateWindow(
+const windowId = SDL_CreateWindow(
     "Hello",
     SDL_WINDOWPOS_UNDEFINED,
     SDL_WINDOWPOS_UNDEFINED,
@@ -16,3 +16,5 @@ const window = SDL_CreateWindow(
     480,
     SDL_WINDOW_OPENGL
 );
+
+console.log('windowId:', windowId);
