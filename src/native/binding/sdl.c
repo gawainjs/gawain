@@ -32,6 +32,24 @@ static JSValue js_sdl_SDL_CreateWindow(
     return js_window_id;
 }
 
+static JSValue js_sdl_SDL_DestroyWindow(
+    JSContext *ctx,
+    JSValueConst this_val,
+    int argc,
+    JSValueConst *argv
+) {
+    Uint32 window_id;
+    if (JS_ToUint32(ctx, &window_id, argv[0])) {
+        return JS_EXCEPTION;
+    }
+    SDL_Window *window = SDL_GetWindowFromID(window_id);
+    if (window == NULL) {
+        return JS_ThrowInternalError(ctx, "Invalid window");
+    }
+    SDL_DestroyWindow(window);
+    return JS_UNDEFINED;
+}
+
 static JSValue js_sdl_SDL_Init(
     JSContext *ctx,
     JSValueConst this_val,
@@ -46,9 +64,21 @@ static JSValue js_sdl_SDL_Init(
     return JS_NewInt32(ctx, res);
 }
 
+static JSValue js_sdl_SDL_Quit(
+    JSContext *ctx,
+    JSValueConst this_val,
+    int argc,
+    JSValueConst *argv
+) {
+    SDL_Quit();
+    return JS_UNDEFINED;
+}
+
 static const JSCFunctionListEntry js_sdl_funcs[] = {
     JS_CFUNC_DEF("SDL_Init", 1, js_sdl_SDL_Init),
     JS_CFUNC_DEF("SDL_CreateWindow", 6, js_sdl_SDL_CreateWindow),
+    JS_CFUNC_DEF("SDL_DestroyWindow", 1, js_sdl_SDL_DestroyWindow),
+    JS_CFUNC_DEF("SDL_Quit", 0, js_sdl_SDL_Quit),
     JS_PROP_INT32_DEF("SDL_INIT_VIDEO", SDL_INIT_VIDEO, JS_PROP_ENUMERABLE),
     JS_PROP_INT32_DEF("SDL_WINDOWPOS_UNDEFINED", SDL_WINDOWPOS_UNDEFINED, JS_PROP_ENUMERABLE),
     JS_PROP_INT32_DEF("SDL_WINDOW_OPENGL", SDL_WINDOW_OPENGL, JS_PROP_ENUMERABLE),

@@ -3,7 +3,9 @@ import {
     SDL_WINDOWPOS_UNDEFINED,
     SDL_WINDOW_OPENGL,
     SDL_Init,
+    SDL_Quit,
     SDL_CreateWindow,
+    SDL_DestroyWindow,
 } from 'sdl.so';
 
 console.log('hello, world!');
@@ -18,3 +20,10 @@ const windowId = SDL_CreateWindow(
 );
 
 console.log('windowId:', windowId);
+SDL_DestroyWindow(windowId);
+try {
+    SDL_DestroyWindow(123);
+} catch (e) {
+    console.log(e);
+}
+SDL_Quit();
