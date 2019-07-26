@@ -33,16 +33,16 @@ int main(int argc, char* argv[]) {
     //     printf("Could not create window: %s\n", SDL_GetError());
     //     return 1;
     // }
-    // while (1) {
-    //     SDL_Event event;
-    //     while (SDL_PollEvent(&event)) {
-    //         switch (event.type) {
-    //             case SDL_QUIT:
-    //                 goto quit;
-    //         }
-    //     }
-    // }
-quit:
+//     while (1) {
+//         SDL_Event event;
+//         while (SDL_PollEvent(&event)) {
+//             switch (event.type) {
+//                 case SDL_QUIT:
+//                     goto quit;
+//             }
+//         }
+//     }
+// quit:
     // SDL_DestroyWindow(window);
     // SDL_Quit();
     return 0;
