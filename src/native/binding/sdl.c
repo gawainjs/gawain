@@ -9,32 +9,33 @@ typedef struct {
 } JSSDLEvent;
 static void js_sdl_event_finalizer(JSRuntime *rt, JSValue val) {
     JSSDLEvent *sdl_event = JS_GetOpaque(val, js_sdl_event_class_id);
+    free(sdl_event->event);
     if (sdl_event) js_free_rt(rt, sdl_event);
 }
 static JSClassDef js_sdl_event_class = {
     "SDL_Event",
     .finalizer = js_sdl_event_finalizer,
-}; 
-static JSValue js_new_sdl_event(JSContext *ctx, SDL_Event *event) {
-    JSValue js_event = JS_NewObjectClass(ctx, js_sdl_event_class_id);
-    if (JS_IsException(js_event)) return js_event;
-    JSSDLEvent *sdl_event = js_mallocz(ctx, sizeof(*sdl_event));
-    if (!sdl_event) {
-        JS_FreeValue(ctx, js_event);
-        return JS_EXCEPTION;
-    }
-    sdl_event->event = event;
-    JS_SetOpaque(js_event, sdl_event);
-    return js_event;
-}
+};
 static SDL_Event *js_sdl_event_get(JSContext *ctx, JSValueConst obj) {
-    JSSDLEvent *sdl_event = JS_GetOpaque2(ctx, obj, js_sdl_event_class_id);
-    if (!sdl_event) return NULL;
-    if (!sdl_event->event) {
+    JSSDLEvent *js_sdl_event = JS_GetOpaque2(ctx, obj, js_sdl_event_class_id);
+    if (!js_sdl_event) return NULL;
+    if (!js_sdl_event->event) {
         JS_ThrowInternalError(ctx, "Invalid event");
         return NULL;
     }
-    return sdl_event->event;
+    return js_sdl_event->event;
+}
+static JSValue js_new_sdl_event(JSContext *ctx, SDL_Event *event) {
+    JSValue js_event = JS_NewObjectClass(ctx, js_sdl_event_class_id);
+    if (JS_IsException(js_event)) return js_event;
+    JSSDLEvent *js_sdl_event = js_mallocz(ctx, sizeof(*js_sdl_event));
+    if (!js_sdl_event) {
+        JS_FreeValue(ctx, js_event);
+        return JS_EXCEPTION;
+    }
+    js_sdl_event->event = event;
+    JS_SetOpaque(js_event, js_sdl_event);
+    return js_event;
 }
 static JSValue js_sdl_event_type_getter(
     JSContext *ctx,
@@ -56,8 +57,7 @@ static JSValue js_sdl_SDL_Init(
 ) {
     Uint32 flags;
     int res;
-    if (JS_ToUint32(ctx, &flags, argv[0]))
-        return JS_EXCEPTION;
+    if (JS_ToUint32(ctx, &flags, argv[0])) return JS_EXCEPTION;
     res = SDL_Init(flags);
     return JS_NewInt32(ctx, res);
 }
@@ -125,9 +125,9 @@ static JSValue js_sdl_SDL_PollEvent(
     int argc,
     JSValueConst *argv
 ) {
-    SDL_Event event;
-    int has_pending_events = SDL_PollEvent(&event);
-    JS_SetPropertyStr(ctx, argv[0], "current", js_new_sdl_event(ctx, &event));
+    SDL_Event* event = malloc(sizeof(*event));
+    int has_pending_events = SDL_PollEvent(event);
+    JS_SetPropertyStr(ctx, argv[0], "current", js_new_sdl_event(ctx, event));
     return JS_NewInt32(ctx, has_pending_events);
 }
 

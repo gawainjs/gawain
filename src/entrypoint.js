@@ -15,10 +15,9 @@ const windowId = sdl.SDL_CreateWindow(
 console.log('windowId:', windowId);
 
 eventloop: while (1) {
-    /** @type {sdl.SDL_Event} */
+    /** @type {sdl.Ref<sdl.SDL_Event>} */
     let event = { current: undefined };
     while (sdl.SDL_PollEvent(event)) {
-        if (event.current.type) console.log(event.current.type);
         switch (event.current.type) {
             case sdl.SDL_QUIT:
                 break eventloop;
