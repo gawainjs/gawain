@@ -201,6 +201,50 @@ static JSValue js_sdl_SDL_DestroyRenderer(
     return JS_UNDEFINED;
 }
 
+static JSValue js_sdl_SDL_SetRenderDrawColor(
+    JSContext *ctx,
+    JSValueConst this_val,
+    int argc,
+    JSValueConst *argv
+) {
+    SDL_Renderer *sdl_renderer = js_sdl_renderer_get(ctx, argv[0]);
+    if (!sdl_renderer) return JS_EXCEPTION;
+    Uint32 r, g, b, a;
+    if (
+        JS_ToUint32(ctx, &r, argv[1]) ||
+        JS_ToUint32(ctx, &g, argv[2]) ||
+        JS_ToUint32(ctx, &b, argv[3]) ||
+        JS_ToUint32(ctx, &a, argv[4])
+    ) {
+        return JS_EXCEPTION;
+    }
+    int result = SDL_SetRenderDrawColor(sdl_renderer, (Uint8) r, (Uint8) g, (Uint8) b, (Uint8) a);
+    return JS_NewInt32(ctx, result);
+}
+
+static JSValue js_sdl_SDL_RenderClear(
+    JSContext *ctx,
+    JSValueConst this_val,
+    int argc,
+    JSValueConst *argv
+) {
+    SDL_Renderer *sdl_renderer = js_sdl_renderer_get(ctx, argv[0]);
+    if (!sdl_renderer) return JS_EXCEPTION;
+    int result = SDL_RenderClear(sdl_renderer);
+    return JS_NewInt32(ctx, result);
+}
+static JSValue js_sdl_SDL_RenderPresent(
+    JSContext *ctx,
+    JSValueConst this_val,
+    int argc,
+    JSValueConst *argv
+) {
+    SDL_Renderer *sdl_renderer = js_sdl_renderer_get(ctx, argv[0]);
+    if (!sdl_renderer) return JS_EXCEPTION;
+    SDL_RenderPresent(sdl_renderer);
+    return JS_UNDEFINED;
+}
+
 static const JSCFunctionListEntry js_sdl_funcs[] = {
     JS_CFUNC_DEF("SDL_Init", 1, js_sdl_SDL_Init),
     JS_CFUNC_DEF("SDL_Quit", 0, js_sdl_SDL_Quit),
@@ -209,6 +253,9 @@ static const JSCFunctionListEntry js_sdl_funcs[] = {
     JS_CFUNC_DEF("SDL_PollEvent", 1, js_sdl_SDL_PollEvent),
     JS_CFUNC_DEF("SDL_CreateRenderer", 3, js_sdl_SDL_CreateRenderer),
     JS_CFUNC_DEF("SDL_DestroyRenderer", 1, js_sdl_SDL_DestroyRenderer),
+    JS_CFUNC_DEF("SDL_SetRenderDrawColor", 5, js_sdl_SDL_SetRenderDrawColor),
+    JS_CFUNC_DEF("SDL_RenderClear", 1, js_sdl_SDL_RenderClear),
+    JS_CFUNC_DEF("SDL_RenderPresent", 1, js_sdl_SDL_RenderPresent),
     JS_PROP_INT32_DEF("SDL_QUIT", SDL_QUIT, JS_PROP_ENUMERABLE),
     JS_PROP_INT32_DEF("SDL_INIT_VIDEO", SDL_INIT_VIDEO, JS_PROP_ENUMERABLE),
     JS_PROP_INT32_DEF("SDL_WINDOWPOS_UNDEFINED", SDL_WINDOWPOS_UNDEFINED, JS_PROP_ENUMERABLE),

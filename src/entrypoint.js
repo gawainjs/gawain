@@ -11,8 +11,12 @@ const windowId = sdl.SDL_CreateWindow(
     480,
     sdl.SDL_WINDOW_OPENGL
 );
-const renderer = sdl.SDL_CreateRenderer(windowId, -1, sdl.SDL_RENDERER_ACCELERATED);
 console.log('windowId:', windowId);
+
+const renderer = sdl.SDL_CreateRenderer(windowId, -1, sdl.SDL_RENDERER_ACCELERATED);
+sdl.SDL_SetRenderDrawColor(renderer, 0xAB, 0xCD, 0xEF, 0xff);
+sdl.SDL_RenderClear(renderer);
+sdl.SDL_RenderPresent(renderer);
 
 eventloop: while (1) {
     /** @type {sdl.Ref<sdl.SDL_Event>} */

@@ -19,4 +19,7 @@ declare module 'sdl.so' {
     export function SDL_PollEvent(eventRef: Ref<SDL_Event>): number;
     export function SDL_CreateRenderer(windowId: SDL_Window, index: number, flags: number): SDL_Renderer;
     export function SDL_DestroyRenderer(renderer: SDL_Renderer): number;
+    export function SDL_SetRenderDrawColor(renderer: SDL_Renderer, r: number, g: number, b: number, a: number): number;
+    export function SDL_RenderClear(renderer: SDL_Renderer): number;
+    export function SDL_RenderPresent(renderer: SDL_Renderer): void;
 }
