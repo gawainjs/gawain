@@ -11,7 +11,7 @@ const windowId = sdl.SDL_CreateWindow(
     480,
     sdl.SDL_WINDOW_OPENGL
 );
-
+const renderer = sdl.SDL_CreateRenderer(windowId, -1, sdl.SDL_RENDERER_ACCELERATED);
 console.log('windowId:', windowId);
 
 eventloop: while (1) {
@@ -25,5 +25,6 @@ eventloop: while (1) {
     }
 }
 
+sdl.SDL_DestroyRenderer(renderer);
 sdl.SDL_DestroyWindow(windowId);
 sdl.SDL_Quit();
