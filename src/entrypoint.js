@@ -16,6 +16,15 @@ console.log('windowId:', windowId);
 const renderer = sdl.SDL_CreateRenderer(windowId, -1, sdl.SDL_RENDERER_ACCELERATED);
 sdl.SDL_SetRenderDrawColor(renderer, 0xAB, 0xCD, 0xEF, 0xff);
 sdl.SDL_RenderClear(renderer);
+
+sdl.SDL_SetRenderDrawColor(renderer, 0xff, 0, 0, 0xff);
+
+sdl.SDL_RenderDrawPoint(renderer, 10, 10);
+sdl.SDL_RenderDrawPoint(renderer, 10, 20);
+sdl.SDL_RenderDrawPoint(renderer, 10, 30);
+sdl.SDL_RenderDrawPoint(renderer, 10, 40);
+sdl.SDL_RenderDrawPoint(renderer, 10, 50);
+
 sdl.SDL_RenderPresent(renderer);
 
 eventloop: while (1) {
