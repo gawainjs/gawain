@@ -245,6 +245,25 @@ static JSValue js_sdl_SDL_RenderPresent(
     return JS_UNDEFINED;
 }
 
+static JSValue js_sdl_SDL_RenderDrawPoint(
+    JSContext *ctx,
+    JSValueConst this_val,
+    int argc,
+    JSValueConst *argv
+) {
+    SDL_Renderer *sdl_renderer = js_sdl_renderer_get(ctx, argv[0]);
+    if (!sdl_renderer) return JS_EXCEPTION;
+    int x, y;
+    if (
+        JS_ToInt32(ctx, &x, argv[1]) ||
+        JS_ToInt32(ctx, &y, argv[2])
+    ) {
+        return JS_EXCEPTION;
+    }
+    int result = SDL_RenderDrawPoint(sdl_renderer, x, y);
+    return JS_NewInt32(ctx, result);
+}
+
 static const JSCFunctionListEntry js_sdl_funcs[] = {
     JS_CFUNC_DEF("SDL_Init", 1, js_sdl_SDL_Init),
     JS_CFUNC_DEF("SDL_Quit", 0, js_sdl_SDL_Quit),
@@ -256,6 +275,7 @@ static const JSCFunctionListEntry js_sdl_funcs[] = {
     JS_CFUNC_DEF("SDL_SetRenderDrawColor", 5, js_sdl_SDL_SetRenderDrawColor),
     JS_CFUNC_DEF("SDL_RenderClear", 1, js_sdl_SDL_RenderClear),
     JS_CFUNC_DEF("SDL_RenderPresent", 1, js_sdl_SDL_RenderPresent),
+    JS_CFUNC_DEF("SDL_RenderDrawPoint", 3, js_sdl_SDL_RenderDrawPoint),
     JS_PROP_INT32_DEF("SDL_QUIT", SDL_QUIT, JS_PROP_ENUMERABLE),
     JS_PROP_INT32_DEF("SDL_INIT_VIDEO", SDL_INIT_VIDEO, JS_PROP_ENUMERABLE),
     JS_PROP_INT32_DEF("SDL_WINDOWPOS_UNDEFINED", SDL_WINDOWPOS_UNDEFINED, JS_PROP_ENUMERABLE),
