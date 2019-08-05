@@ -285,6 +285,28 @@ static JSValue js_sdl_SDL_RenderDrawLine(
     return JS_NewInt32(ctx, result);
 }
 
+static JSValue js_sdl_SDL_RenderDrawRect(
+    JSContext *ctx,
+    JSValueConst this_val,
+    int argc,
+    JSValueConst *argv
+) {
+    SDL_Renderer *sdl_renderer = js_sdl_renderer_get(ctx, argv[0]);
+    if (!sdl_renderer) return JS_EXCEPTION;
+    int x, y, w, h;
+    if (
+        JS_ToInt32(ctx, &x, JS_GetPropertyStr(ctx, argv[1], "x")) ||
+        JS_ToInt32(ctx, &y, JS_GetPropertyStr(ctx, argv[1], "y")) ||
+        JS_ToInt32(ctx, &w, JS_GetPropertyStr(ctx, argv[1], "w")) ||
+        JS_ToInt32(ctx, &h, JS_GetPropertyStr(ctx, argv[1], "h"))
+    ) {
+        return JS_EXCEPTION;
+    }
+    SDL_Rect sdl_rect = { .x = x, .y = y, .w = w, .h = h };
+    int result = SDL_RenderDrawRect(sdl_renderer, &sdl_rect);
+    return JS_NewInt32(ctx, result);
+}
+
 static const JSCFunctionListEntry js_sdl_funcs[] = {
     JS_CFUNC_DEF("SDL_Init", 1, js_sdl_SDL_Init),
     JS_CFUNC_DEF("SDL_Quit", 0, js_sdl_SDL_Quit),
@@ -298,6 +320,7 @@ static const JSCFunctionListEntry js_sdl_funcs[] = {
     JS_CFUNC_DEF("SDL_RenderPresent", 1, js_sdl_SDL_RenderPresent),
     JS_CFUNC_DEF("SDL_RenderDrawPoint", 3, js_sdl_SDL_RenderDrawPoint),
     JS_CFUNC_DEF("SDL_RenderDrawLine", 5, js_sdl_SDL_RenderDrawLine),
+    JS_CFUNC_DEF("SDL_RenderDrawRect", 5, js_sdl_SDL_RenderDrawRect),
     JS_PROP_INT32_DEF("SDL_QUIT", SDL_QUIT, JS_PROP_ENUMERABLE),
     JS_PROP_INT32_DEF("SDL_INIT_VIDEO", SDL_INIT_VIDEO, JS_PROP_ENUMERABLE),
     JS_PROP_INT32_DEF("SDL_WINDOWPOS_UNDEFINED", SDL_WINDOWPOS_UNDEFINED, JS_PROP_ENUMERABLE),

@@ -5,6 +5,7 @@ declare module 'sdl.so' {
     export interface SDL_Event {
         readonly type: SDL_EventType;
     }
+    export interface SDL_Rect { x: number; y: number; w: number; h: number; }
     export type SDL_Renderer = Brand<'SDL_Renderer'>;
     export interface Ref<T> { current?: T }
     export const SDL_QUIT: number;
@@ -24,4 +25,5 @@ declare module 'sdl.so' {
     export function SDL_RenderPresent(renderer: SDL_Renderer): void;
     export function SDL_RenderDrawPoint(renderer: SDL_Renderer, x: number, y: number): number;
     export function SDL_RenderDrawLine(renderer: SDL_Renderer, x1: number, y1: number, x2: number, y2: number): number;
+    export function SDL_RenderDrawRect(renderer: SDL_Renderer, rect: SDL_Rect): number;
 }
