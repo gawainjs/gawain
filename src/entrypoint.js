@@ -25,6 +25,11 @@ sdl.SDL_RenderDrawPoint(renderer, 10, 30);
 sdl.SDL_RenderDrawPoint(renderer, 10, 40);
 sdl.SDL_RenderDrawPoint(renderer, 10, 50);
 
+sdl.SDL_SetRenderDrawColor(renderer, 0, 0xff, 0, 0xff);
+sdl.SDL_RenderDrawLine(renderer, 100, 100, 200, 200);
+sdl.SDL_SetRenderDrawColor(renderer, 0, 0, 0xff, 0xff);
+sdl.SDL_RenderDrawLine(renderer, 123, 123, 234, 456);
+
 sdl.SDL_RenderPresent(renderer);
 
 eventloop: while (1) {

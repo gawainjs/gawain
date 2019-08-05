@@ -23,4 +23,5 @@ declare module 'sdl.so' {
     export function SDL_RenderClear(renderer: SDL_Renderer): number;
     export function SDL_RenderPresent(renderer: SDL_Renderer): void;
     export function SDL_RenderDrawPoint(renderer: SDL_Renderer, x: number, y: number): number;
+    export function SDL_RenderDrawLine(renderer: SDL_Renderer, x1: number, y1: number, x2: number, y2: number): number;
 }
