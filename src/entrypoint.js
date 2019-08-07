@@ -32,6 +32,8 @@ sdl.SDL_RenderDrawLine(renderer, 123, 123, 234, 456);
 
 sdl.SDL_SetRenderDrawColor(renderer, 0, 0xff, 0xff, 0xff);
 sdl.SDL_RenderDrawRect(renderer, { x: 300, y: 100, w: 50, h: 50 });
+sdl.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+sdl.SDL_RenderFillRect(renderer, { x: 200, y: 50, w: 50, h: 50 });
 
 sdl.SDL_RenderPresent(renderer);
 
