@@ -169,6 +169,15 @@ static JSValue js_sdl_SDL_DestroyWindow(
     return JS_UNDEFINED;
 }
 
+static JSValue js_sdl_SDL_GetTicks(
+    JSContext *ctx,
+    JSValueConst this_val,
+    int argc,
+    JSValueConst *argv
+) {
+    return JS_NewInt32(ctx, SDL_GetTicks());
+}
+
 static JSValue js_sdl_SDL_PollEvent(
     JSContext *ctx,
     JSValueConst this_val,
@@ -359,6 +368,7 @@ static const JSCFunctionListEntry js_sdl_funcs[] = {
     JS_CFUNC_DEF("SDL_Quit", 0, js_sdl_SDL_Quit),
     JS_CFUNC_DEF("SDL_CreateWindow", 6, js_sdl_SDL_CreateWindow),
     JS_CFUNC_DEF("SDL_DestroyWindow", 1, js_sdl_SDL_DestroyWindow),
+    JS_CFUNC_DEF("SDL_GetTicks", 0, js_sdl_SDL_GetTicks),
     JS_CFUNC_DEF("SDL_PollEvent", 1, js_sdl_SDL_PollEvent),
     JS_CFUNC_DEF("SDL_GetKeyboardState", 1, js_sdl_SDL_GetKeyboardState),
     JS_CFUNC_DEF("SDL_CreateRenderer", 3, js_sdl_SDL_CreateRenderer),

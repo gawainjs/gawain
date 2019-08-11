@@ -24,6 +24,7 @@ declare module 'sdl.so' {
     export function SDL_Quit(): void;
     export function SDL_CreateWindow(title: string, x: number, y: number, w: number, h: number, flags: number): SDL_Window;
     export function SDL_DestroyWindow(windowId: SDL_Window): void;
+    export function SDL_GetTicks(): number;
     export function SDL_PollEvent(eventRef: Ref<SDL_Event>): number;
     export function SDL_GetKeyboardState(numkeysRef?: Ref<number>): ArrayBuffer;
     export function SDL_CreateRenderer(windowId: SDL_Window, index: number, flags: number): SDL_Renderer;

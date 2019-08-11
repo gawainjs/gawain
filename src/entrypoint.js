@@ -23,11 +23,25 @@ const appState = {
     y: 0,
 };
 
+/**
+ * @param pps {number} pixels per second
+ * @param delta {number} time delta in milliseconds
+ * @returns {number}
+*/
+function d(pps, delta) {
+    return pps * delta / 1000;
+}
+
+let lastTick = sdl.SDL_GetTicks();
 function update() {
-    if (keyboardState[sdl.SDL_SCANCODE_UP]) --appState.y;
-    if (keyboardState[sdl.SDL_SCANCODE_DOWN]) ++appState.y;
-    if (keyboardState[sdl.SDL_SCANCODE_LEFT]) --appState.x;
-    if (keyboardState[sdl.SDL_SCANCODE_RIGHT]) ++appState.x;
+    const nowTick = sdl.SDL_GetTicks();
+    const timeDelta = nowTick - lastTick;
+    const blockSpeed = d(500, timeDelta);
+    if (keyboardState[sdl.SDL_SCANCODE_UP]) appState.y -= blockSpeed;
+    if (keyboardState[sdl.SDL_SCANCODE_DOWN]) appState.y += blockSpeed;
+    if (keyboardState[sdl.SDL_SCANCODE_LEFT]) appState.x -= blockSpeed;
+    if (keyboardState[sdl.SDL_SCANCODE_RIGHT]) appState.x += blockSpeed;
+    lastTick = nowTick;
 }
 
 const renderer = sdl.SDL_CreateRenderer(windowId, -1, sdl.SDL_RENDERER_ACCELERATED);
