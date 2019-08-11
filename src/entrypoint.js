@@ -3,8 +3,9 @@ import * as sdl from 'sdl.so';
 console.log('hello, world!');
 
 sdl.SDL_Init(sdl.SDL_INIT_VIDEO);
+sdl.SDL_SetHint(sdl.SDL_HINT_RENDER_VSYNC, '1');
 const windowId = sdl.SDL_CreateWindow(
-    "Hello",
+    'Hello',
     sdl.SDL_WINDOWPOS_UNDEFINED,
     sdl.SDL_WINDOWPOS_UNDEFINED,
     640,

@@ -8,6 +8,7 @@ declare module 'sdl.so' {
     export interface SDL_Rect { x: number; y: number; w: number; h: number; }
     export type SDL_Renderer = Brand<'SDL_Renderer'>;
     export interface Ref<T> { current?: T }
+    export const SDL_HINT_RENDER_VSYNC: string;
     export const SDL_QUIT: number;
     export const SDL_INIT_VIDEO: number;
     export const SDL_WINDOWPOS_UNDEFINED: number;
@@ -18,6 +19,7 @@ declare module 'sdl.so' {
     export const SDL_SCANCODE_DOWN: number;
     export const SDL_SCANCODE_LEFT: number;
     export const SDL_SCANCODE_RIGHT: number;
+    export function SDL_SetHint(name: string, value: string): void;
     export function SDL_Init(flags: number): void;
     export function SDL_Quit(): void;
     export function SDL_CreateWindow(title: string, x: number, y: number, w: number, h: number, flags: number): SDL_Window;

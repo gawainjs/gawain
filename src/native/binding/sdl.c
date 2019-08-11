@@ -87,6 +87,18 @@ static JSValue js_new_sdl_renderer(JSContext *ctx, SDL_Renderer *renderer) {
 }
 // renderer end
 
+static JSValue js_sdl_SDL_SetHint(
+    JSContext *ctx,
+    JSValueConst this_val,
+    int argc,
+    JSValueConst *argv
+) {
+    const char *name = JS_ToCString(ctx, argv[0]);
+    const char *value = JS_ToCString(ctx, argv[1]);
+    SDL_bool hint_was_set = SDL_SetHint(name, value);
+    return JS_NewBool(ctx, (int) hint_was_set);
+}
+
 static JSValue js_sdl_SDL_Init(
     JSContext *ctx,
     JSValueConst this_val,
@@ -342,6 +354,7 @@ static JSValue js_sdl_SDL_RenderFillRect(
 }
 
 static const JSCFunctionListEntry js_sdl_funcs[] = {
+    JS_CFUNC_DEF("SDL_SetHint", 2, js_sdl_SDL_SetHint),
     JS_CFUNC_DEF("SDL_Init", 1, js_sdl_SDL_Init),
     JS_CFUNC_DEF("SDL_Quit", 0, js_sdl_SDL_Quit),
     JS_CFUNC_DEF("SDL_CreateWindow", 6, js_sdl_SDL_CreateWindow),
@@ -357,6 +370,7 @@ static const JSCFunctionListEntry js_sdl_funcs[] = {
     JS_CFUNC_DEF("SDL_RenderDrawLine", 5, js_sdl_SDL_RenderDrawLine),
     JS_CFUNC_DEF("SDL_RenderDrawRect", 2, js_sdl_SDL_RenderDrawRect),
     JS_CFUNC_DEF("SDL_RenderFillRect", 2, js_sdl_SDL_RenderFillRect),
+    JS_PROP_STRING_DEF("SDL_HINT_RENDER_VSYNC", SDL_HINT_RENDER_VSYNC, JS_PROP_ENUMERABLE),
     JS_PROP_INT32_DEF("SDL_QUIT", SDL_QUIT, JS_PROP_ENUMERABLE),
     JS_PROP_INT32_DEF("SDL_INIT_VIDEO", SDL_INIT_VIDEO, JS_PROP_ENUMERABLE),
     JS_PROP_INT32_DEF("SDL_WINDOWPOS_UNDEFINED", SDL_WINDOWPOS_UNDEFINED, JS_PROP_ENUMERABLE),
