@@ -13,11 +13,17 @@ declare module 'sdl.so' {
     export const SDL_WINDOWPOS_UNDEFINED: number;
     export const SDL_WINDOW_OPENGL: number;
     export const SDL_RENDERER_ACCELERATED: number;
+    export const SDL_NUM_SCANCODES: number;
+    export const SDL_SCANCODE_UP: number;
+    export const SDL_SCANCODE_DOWN: number;
+    export const SDL_SCANCODE_LEFT: number;
+    export const SDL_SCANCODE_RIGHT: number;
     export function SDL_Init(flags: number): void;
     export function SDL_Quit(): void;
     export function SDL_CreateWindow(title: string, x: number, y: number, w: number, h: number, flags: number): SDL_Window;
     export function SDL_DestroyWindow(windowId: SDL_Window): void;
     export function SDL_PollEvent(eventRef: Ref<SDL_Event>): number;
+    export function SDL_GetKeyboardState(numkeysRef?: Ref<number>): ArrayBuffer;
     export function SDL_CreateRenderer(windowId: SDL_Window, index: number, flags: number): SDL_Renderer;
     export function SDL_DestroyRenderer(renderer: SDL_Renderer): number;
     export function SDL_SetRenderDrawColor(renderer: SDL_Renderer, r: number, g: number, b: number, a: number): number;

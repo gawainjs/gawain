@@ -169,6 +169,18 @@ static JSValue js_sdl_SDL_PollEvent(
     return JS_NewInt32(ctx, has_pending_events);
 }
 
+static JSValue js_sdl_SDL_GetKeyboardState(
+    JSContext *ctx,
+    JSValueConst this_val,
+    int argc,
+    JSValueConst *argv
+) {
+    int numkeys;
+    const Uint8* sdl_keyboard_state = SDL_GetKeyboardState(&numkeys);
+    if (!JS_IsUndefined(argv[0])) JS_SetPropertyStr(ctx, argv[0], "current", JS_NewInt32(ctx, numkeys));
+    return JS_NewArrayBuffer(ctx, (uint8_t *) sdl_keyboard_state, (size_t) numkeys, NULL, NULL, 1);
+}
+
 static JSValue js_sdl_SDL_CreateRenderer(
     JSContext *ctx,
     JSValueConst this_val,
@@ -335,6 +347,7 @@ static const JSCFunctionListEntry js_sdl_funcs[] = {
     JS_CFUNC_DEF("SDL_CreateWindow", 6, js_sdl_SDL_CreateWindow),
     JS_CFUNC_DEF("SDL_DestroyWindow", 1, js_sdl_SDL_DestroyWindow),
     JS_CFUNC_DEF("SDL_PollEvent", 1, js_sdl_SDL_PollEvent),
+    JS_CFUNC_DEF("SDL_GetKeyboardState", 1, js_sdl_SDL_GetKeyboardState),
     JS_CFUNC_DEF("SDL_CreateRenderer", 3, js_sdl_SDL_CreateRenderer),
     JS_CFUNC_DEF("SDL_DestroyRenderer", 1, js_sdl_SDL_DestroyRenderer),
     JS_CFUNC_DEF("SDL_SetRenderDrawColor", 5, js_sdl_SDL_SetRenderDrawColor),
@@ -349,6 +362,11 @@ static const JSCFunctionListEntry js_sdl_funcs[] = {
     JS_PROP_INT32_DEF("SDL_WINDOWPOS_UNDEFINED", SDL_WINDOWPOS_UNDEFINED, JS_PROP_ENUMERABLE),
     JS_PROP_INT32_DEF("SDL_WINDOW_OPENGL", SDL_WINDOW_OPENGL, JS_PROP_ENUMERABLE),
     JS_PROP_INT32_DEF("SDL_RENDERER_ACCELERATED", SDL_RENDERER_ACCELERATED, JS_PROP_ENUMERABLE),
+    JS_PROP_INT32_DEF("SDL_NUM_SCANCODES", SDL_NUM_SCANCODES, JS_PROP_ENUMERABLE),
+    JS_PROP_INT32_DEF("SDL_SCANCODE_UP", SDL_SCANCODE_UP, JS_PROP_ENUMERABLE),
+    JS_PROP_INT32_DEF("SDL_SCANCODE_DOWN", SDL_SCANCODE_DOWN, JS_PROP_ENUMERABLE),
+    JS_PROP_INT32_DEF("SDL_SCANCODE_LEFT", SDL_SCANCODE_LEFT, JS_PROP_ENUMERABLE),
+    JS_PROP_INT32_DEF("SDL_SCANCODE_RIGHT", SDL_SCANCODE_RIGHT, JS_PROP_ENUMERABLE),
 };
 
 static int js_sdl_init(JSContext *ctx, JSModuleDef *m) {

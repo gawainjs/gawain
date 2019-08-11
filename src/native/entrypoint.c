@@ -10,6 +10,7 @@ int main(int argc, char* argv[]) {
     rt = JS_NewRuntime();
     ctx = JS_NewContextRaw(rt);
     JS_AddIntrinsicBaseObjects(ctx);
+    JS_AddIntrinsicTypedArrays(ctx);
     js_std_add_helpers(ctx, argc, argv);
     {
         extern JSModuleDef *js_init_module_sdl(JSContext *ctx, const char *name);
