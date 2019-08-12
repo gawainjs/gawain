@@ -1,6 +1,10 @@
 import * as sdl from 'sdl.so';
 
-console.log('hello, world!');
+const stageWidth = 400;
+const stageHeight = 600;
+const playerWidth = 100;
+const playerHeight = 20;
+const ballSize = 20;
 
 sdl.SDL_Init(sdl.SDL_INIT_VIDEO);
 sdl.SDL_SetHint(sdl.SDL_HINT_RENDER_VSYNC, '1');
@@ -8,8 +12,8 @@ const windowId = sdl.SDL_CreateWindow(
     'Hello',
     sdl.SDL_WINDOWPOS_UNDEFINED,
     sdl.SDL_WINDOWPOS_UNDEFINED,
-    640,
-    480,
+    stageWidth,
+    stageHeight,
     sdl.SDL_WINDOW_OPENGL
 );
 console.log('windowId:', windowId);
@@ -19,8 +23,16 @@ const keyboardState = new Uint8Array(sdl.SDL_GetKeyboardState(numkeys));
 console.log('numkeys:', numkeys.current);
 
 const appState = {
-    x: 0,
-    y: 0,
+    player: {
+        x: (stageWidth - playerWidth) / 2,
+        y: stageHeight - 50,
+    },
+    ball: {
+        x: stageWidth / 2,
+        y: stageHeight / 2,
+        speed: 150, // pps
+        angle: Math.PI / 2, // radian
+    },
 };
 
 /**
@@ -36,38 +48,96 @@ let lastTick = sdl.SDL_GetTicks();
 function update() {
     const nowTick = sdl.SDL_GetTicks();
     const timeDelta = nowTick - lastTick;
-    const blockSpeed = d(500, timeDelta);
-    if (keyboardState[sdl.SDL_SCANCODE_UP]) appState.y -= blockSpeed;
-    if (keyboardState[sdl.SDL_SCANCODE_DOWN]) appState.y += blockSpeed;
-    if (keyboardState[sdl.SDL_SCANCODE_LEFT]) appState.x -= blockSpeed;
-    if (keyboardState[sdl.SDL_SCANCODE_RIGHT]) appState.x += blockSpeed;
+    const playerSpeed = d(500, timeDelta);
+    const ballSpeed = d(appState.ball.speed, timeDelta);
+    if (keyboardState[sdl.SDL_SCANCODE_LEFT]) appState.player.x -= playerSpeed;
+    if (keyboardState[sdl.SDL_SCANCODE_RIGHT]) appState.player.x += playerSpeed;
+    appState.ball.x += Math.cos(appState.ball.angle) * ballSpeed;
+    appState.ball.y += Math.sin(appState.ball.angle) * ballSpeed;
+    physics();
     lastTick = nowTick;
+}
+function physics() {
+    const playerBox = getPlayerBox();
+    const ballBox = getBallBox();
+    appState.player.x = Math.max(Math.min(stageWidth - playerWidth, appState.player.x), 0);
+    const dx = Math.cos(appState.ball.angle);
+    const dy = Math.sin(appState.ball.angle);
+    // ball & player
+    if (aabb(playerBox, ballBox) && (dy > 0)) {
+        appState.ball.angle = (Math.random() * (Math.PI / 2)) + (Math.PI * 5 / 4);
+        appState.ball.speed += 15;
+    }
+    { // ball
+        const { x, y, w } = ballBox;
+        // left wall
+        if ((x < 0) && (dx < 0)) appState.ball.angle = Math.PI - appState.ball.angle;
+        // right wall
+        if (((x + w) > stageWidth) && (dx > 0)) appState.ball.angle = Math.PI - appState.ball.angle;
+        // top wall
+        if ((y < 0) && (dy < 0)) appState.ball.angle = -appState.ball.angle;
+    }
+}
+function getPlayerBox() {
+    return {
+        x: appState.player.x,
+        y: appState.player.y,
+        w: playerWidth,
+        h: playerHeight,
+    };
+}
+function getBallBox() {
+    return {
+        x: appState.ball.x,
+        y: appState.ball.y,
+        w: ballSize,
+        h: ballSize,
+    };
+}
+
+/**
+ * @param {{x: number, y: number, w: number, h: number}} box1 
+ * @param {{x: number, y: number, w: number, h: number}} box2 
+ * @returns {boolean}
+ * @example
+ *          |-------|
+ *      |---|---|   |
+ *      |   |---|---|
+ *      |-------|
+ *      => true
+ *          |-------|
+ *          |       |
+ *          |-------|
+ *      |-------|
+ *      |       |
+ *      |-------|
+ *      => false
+ */
+function aabb(box1, box2) {
+    if (box1.x > (box2.x + box2.w)) return false;
+    if ((box1.x + box1.w) < box2.x) return false;
+    if (box1.y > (box2.y + box2.h)) return false;
+    if ((box1.y + box1.h) < box2.y) return false;
+    return true;
 }
 
 const renderer = sdl.SDL_CreateRenderer(windowId, -1, sdl.SDL_RENDERER_ACCELERATED);
 function render() {
-    sdl.SDL_SetRenderDrawColor(renderer, 0xAB, 0xCD, 0xEF, 0xff);
-    sdl.SDL_RenderClear(renderer);
-    
-    sdl.SDL_SetRenderDrawColor(renderer, 0xff, 0, 0, 0xff);
-    
-    sdl.SDL_RenderDrawPoint(renderer, 10, 10);
-    sdl.SDL_RenderDrawPoint(renderer, 10, 20);
-    sdl.SDL_RenderDrawPoint(renderer, 10, 30);
-    sdl.SDL_RenderDrawPoint(renderer, 10, 40);
-    sdl.SDL_RenderDrawPoint(renderer, 10, 50);
-    
-    sdl.SDL_SetRenderDrawColor(renderer, 0, 0xff, 0, 0xff);
-    sdl.SDL_RenderDrawLine(renderer, 100, 100, 200, 200);
-    sdl.SDL_SetRenderDrawColor(renderer, 0, 0, 0xff, 0xff);
-    sdl.SDL_RenderDrawLine(renderer, 123, 123, 234, 456);
-    
-    sdl.SDL_SetRenderDrawColor(renderer, 0, 0xff, 0xff, 0xff);
-    sdl.SDL_RenderDrawRect(renderer, { x: 300, y: 100, w: 50, h: 50 });
     sdl.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xff);
-    sdl.SDL_RenderFillRect(renderer, { x: appState.x, y: appState.y, w: 50, h: 50 });
-    
+    sdl.SDL_RenderClear(renderer);
+    renderPlayer(appState.player.x, appState.player.y);
+    renderBall(appState.ball.x, appState.ball.y);
     sdl.SDL_RenderPresent(renderer);
+}
+
+function renderPlayer(x, y) {
+    sdl.SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xff);
+    sdl.SDL_RenderFillRect(renderer, { x, y, w: playerWidth, h: playerHeight });
+}
+
+function renderBall(x, y) {
+    sdl.SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xff);
+    sdl.SDL_RenderFillRect(renderer, { x, y, w: ballSize, h: ballSize });
 }
 
 eventloop: while (1) {
