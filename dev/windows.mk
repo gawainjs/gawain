@@ -1,6 +1,10 @@
 CC = x86_64-w64-mingw32-gcc
 SDL2 = tmp/SDL2-2.0.10/x86_64-w64-mingw32
+# QUICKJS = tmp/quickjs-2019-08-18
+QUICKJS_LIB = tmp/quickjs-windows-master/build
+QUICKJS_INCLUDE = tmp/quickjs-windows-master/quickjs-2019-08-10
 
+TMP = tmp
 DIST = dist
 OBJDIR = .obj
 GENERATED = src/generated
@@ -15,19 +19,19 @@ all: $(BIN)
 
 .PHONY: clean
 clean:
-	-@$(RM) -rf $(DIST) $(OBJDIR) $(GENERATED)
+	-@$(RM) -rf $(TMP) $(DIST) $(OBJDIR) $(GENERATED)
 
 $(BIN): $(ENTRYPOINT) $(patsubst src/native/binding/%.c, $(OBJDIR)/%.o, $(NATIVE_BINDINGS))
 	@mkdir -p $(DIST)
-	$(CC) -L/usr/local/lib -lmingw32 -L$(SDL2)/lib -lSDL2 -L/usr/local/lib/quickjs -lquickjs -o $@ $^
+	$(CC) -static -mwindows -L/usr/local/lib -lmingw32 -L$(SDL2)/lib -lSDL2main -lSDL2 -L$(QUICKJS_LIB) -lquickjs -o $@ $^
 
 $(ENTRYPOINT): $(JS_ENTRYPOINT) $(C_ENTRYPOINT)
 	@mkdir -p $(OBJDIR)
-	$(CC) -I$(SDL2)/include/SDL2 -D_THREAD_SAFE -I/usr/local/include/quickjs -c -o $@ $(C_ENTRYPOINT)
+	$(CC) -I$(SDL2)/include/SDL2 -D_THREAD_SAFE -I$(QUICKJS_INCLUDE) -c -o $@ $(C_ENTRYPOINT)
 
 $(OBJDIR)/%.o: src/native/binding/%.c
 	@mkdir -p $(OBJDIR)
-	$(CC) -I$(SDL2)/include/SDL2 -D_THREAD_SAFE -I/usr/local/include/quickjs -c -o $@ $<
+	$(CC) -I$(SDL2)/include/SDL2 -D_THREAD_SAFE -I$(QUICKJS_INCLUDE) -c -o $@ $<
 
 $(JS_ENTRYPOINT): src/entrypoint.js
 	@mkdir -p $(GENERATED)
