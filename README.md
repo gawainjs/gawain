@@ -2,6 +2,6 @@
 
 ### Mac OS X
 ```sh
-brew install quickjs sdl2
+brew install quickjs
 make
 ```
