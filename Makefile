@@ -6,31 +6,29 @@ ENTRYPOINT = $(OBJDIR)/entrypoint.o
 C_ENTRYPOINT = src/native/entrypoint.c
 JS_ENTRYPOINT = $(GENERATED)/js-entrypoint.c
 NATIVE_BINDINGS = $(wildcard src/native/binding/*.c)
-BIN = $(DIST)/app
+BIN = $(TMP)/app
 SDL2_VERSION = 2.0.10
 SDL2_FRAMEWORK = $(TMP)/SDL2.framework
 CC_SDL2_OPTIONS_MACOS = -rpath @executable_path/../Frameworks -F $(TMP) -framework SDL2
 
 .PHONY: all
-all: clean prod
+all: clean macos
 
 .PHONY: clean
 clean:
 	-@$(RM) -rf $(TMP) $(DIST) $(OBJDIR) $(GENERATED)
 
-.PHONY: prod
-prod: dev
+.PHONY: macos
+macos: $(BIN)
+	@mkdir -p $(DIST)
 	cp -R dev/gawain.app $(DIST)/gawain.app
 	@mkdir -p $(DIST)/gawain.app/Contents/MacOS
 	cp $(BIN) $(DIST)/gawain.app/Contents/MacOS/app
 	@mkdir -p $(DIST)/gawain.app/Contents/Frameworks
 	cp -R $(SDL2_FRAMEWORK) $(DIST)/gawain.app/Contents/Frameworks/SDL2.framework
 
-.PHONY: dev
-dev: $(BIN)
-
 $(BIN): $(ENTRYPOINT) $(patsubst src/native/binding/%.c, $(OBJDIR)/%.o, $(NATIVE_BINDINGS))
-	@mkdir -p $(DIST)
+	@mkdir -p $(TMP)
 	$(CC) $(CC_SDL2_OPTIONS_MACOS) -L/usr/local/lib/quickjs -lquickjs -o $@ $^
 
 $(ENTRYPOINT): $(JS_ENTRYPOINT) $(C_ENTRYPOINT)
