@@ -3,4 +3,5 @@
 /dist
 /tmp
 /.obj
+/node_modules
 /src/generated
