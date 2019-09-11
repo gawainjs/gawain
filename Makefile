@@ -12,15 +12,19 @@ BIN_MACOS = $(TMP)/macos/app
 BIN_WINDOWS = $(TMP)/windows/app
 SDL2_VERSION = 2.0.10
 QUICKJS_VERSION = 2019-08-10
+DOCKCROSS_WINDOWS = $(TMP)/dockcross-win
 SDL2_FRAMEWORK_MACOS = $(TMP)/SDL2.framework
 SDL2_MINGW_WINDOWS = $(TMP)/SDL2-$(SDL2_VERSION)/x86_64-w64-mingw32
-CC_SDL2_OPTIONS_MACOS = -rpath @executable_path/../Frameworks -F $(TMP) -framework SDL2
-CC_SDL2_OPTIONS_WINDOWS = -I$(SDL2_MINGW_WINDOWS)/include/SDL2 -L$(SDL2_MINGW_WINDOWS)/lib $($(SDL2_CONFIG_WINDOWS) --static-libs)
-CC_QUICKJS_PATH_WINDOWS = ./node_modules/quickjs-static/bin/windows/quickjs-$(QUICKJS_VERSION)
-CC_QUICKJS_OPTIONS_WINDOWS = -I$(CC_QUICKJS_PATH_WINDOWS) -L$(CC_QUICKJS_PATH_WINDOWS) -lquickjs
-CC_WINDOWS_OPTIONS = $(CC_SDL2_OPTIONS_WINDOWS) $(CC_QUICKJS_OPTIONS_WINDOWS)
-DOCKCROSS_WINDOWS = $(TMP)/dockcross-win
+CC_WINDOWS = $(DOCKCROSS_WINDOWS) x86_64-w64-mingw32.static-gcc
 SDL2_CONFIG_WINDOWS = $(DOCKCROSS_WINDOWS) $(SDL2_MINGW_WINDOWS)/bin/sdl2-config
+CC_SDL2_OPTIONS_MACOS = -rpath @executable_path/../Frameworks -F $(TMP) -framework SDL2
+CC_SDL2_OPTIONS_WINDOWS = -I$(SDL2_MINGW_WINDOWS)/include/SDL2 -L$(SDL2_MINGW_WINDOWS)/lib $(shell $(SDL2_CONFIG_WINDOWS) --static-libs)
+CC_QUICKJS_PATH_MACOS = node_modules/quickjs-static/bin/macos/quickjs-$(QUICKJS_VERSION)
+CC_QUICKJS_PATH_WINDOWS = node_modules/quickjs-static/bin/windows/quickjs-$(QUICKJS_VERSION)
+CC_QUICKJS_OPTIONS_MACOS = -I$(CC_QUICKJS_PATH_MACOS) -L$(CC_QUICKJS_PATH_MACOS) -lquickjs
+CC_QUICKJS_OPTIONS_WINDOWS = -I$(CC_QUICKJS_PATH_WINDOWS) -L$(CC_QUICKJS_PATH_WINDOWS) -lquickjs
+CC_MACOS_OPTIONS = $(CC_SDL2_OPTIONS_MACOS) $(CC_QUICKJS_OPTIONS_MACOS)
+CC_WINDOWS_OPTIONS = -static $(CC_SDL2_OPTIONS_WINDOWS) $(CC_QUICKJS_OPTIONS_WINDOWS)
 
 .PHONY: all
 all: clean macos # windows
@@ -43,27 +47,27 @@ windows: $(BIN_WINDOWS)
 
 $(BIN_MACOS): $(ENTRYPOINT_MACOS) $(patsubst src/native/binding/%.c, $(OBJDIR_MACOS)/%.o, $(NATIVE_BINDINGS))
 	@mkdir -p $(TMP)/macos
-	$(CC) $(CC_SDL2_OPTIONS_MACOS) -L/usr/local/lib/quickjs -lquickjs -o $@ $^
+	$(CC) $(CC_MACOS_OPTIONS) -o $@ $^
 
 $(ENTRYPOINT_MACOS): $(JS_ENTRYPOINT) $(C_ENTRYPOINT) $(SDL2_FRAMEWORK_MACOS)
 	@mkdir -p $(OBJDIR_MACOS)
-	$(CC) $(CC_SDL2_OPTIONS_MACOS) -I/usr/local/include/quickjs -c -o $@ $(C_ENTRYPOINT)
+	$(CC) $(CC_MACOS_OPTIONS) -c -o $@ $(C_ENTRYPOINT)
 
 $(OBJDIR_MACOS)/%.o: src/native/binding/%.c $(SDL2_FRAMEWORK_MACOS)
 	@mkdir -p $(OBJDIR_MACOS)
-	$(CC) $(CC_SDL2_OPTIONS_MACOS) -I/usr/local/include/quickjs -c -o $@ $<
+	$(CC) $(CC_MACOS_OPTIONS) -c -o $@ $<
 
 $(BIN_WINDOWS): $(ENTRYPOINT_WINDOWS) $(patsubst src/native/binding/%.c, $(OBJDIR_WINDOWS)/%.o, $(NATIVE_BINDINGS))
 	@mkdir -p $(TMP)/windows
-	$(DOCKCROSS_WINDOWS) x86_64-w64-mingw32.static-gcc -static $(CC_WINDOWS_OPTIONS) -o $@ $^
+	$(CC_WINDOWS) $(CC_WINDOWS_OPTIONS) -o $@ $^
 
 $(ENTRYPOINT_WINDOWS): $(JS_ENTRYPOINT) $(C_ENTRYPOINT) $(SDL2_MINGW_WINDOWS) $(DOCKCROSS_WINDOWS)
 	@mkdir -p $(OBJDIR_WINDOWS)
-	$(DOCKCROSS_WINDOWS) x86_64-w64-mingw32.static-gcc -static $(CC_WINDOWS_OPTIONS) -c -o $@ $(C_ENTRYPOINT)
+	$(CC_WINDOWS) $(CC_WINDOWS_OPTIONS) -c -o $@ $(C_ENTRYPOINT)
 
 $(OBJDIR_WINDOWS)/%.o: src/native/binding/%.c $(SDL2_MINGW_WINDOWS) $(DOCKCROSS_WINDOWS)
 	@mkdir -p $(OBJDIR_WINDOWS)
-	$(DOCKCROSS_WINDOWS) x86_64-w64-mingw32.static-gcc -static $(CC_WINDOWS_OPTIONS) -c -o $@ $<
+	$(CC_WINDOWS) $(CC_WINDOWS_OPTIONS) -c -o $@ $<
 
 $(JS_ENTRYPOINT): src/entrypoint.js
 	@mkdir -p $(GENERATED)
