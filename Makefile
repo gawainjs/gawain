@@ -44,7 +44,7 @@ $(BIN_MACOS): $(ENTRYPOINT_MACOS) $(patsubst src/native/binding/%.c, $(OBJDIR_MA
 	@mkdir -p $(TMP)/macos
 	$(CC) $(CC_SDL2_OPTIONS_MACOS) -L/usr/local/lib/quickjs -lquickjs -o $@ $^
 
-$(ENTRYPOINT_MACOS): $(JS_ENTRYPOINT) $(C_ENTRYPOINT)
+$(ENTRYPOINT_MACOS): $(JS_ENTRYPOINT) $(C_ENTRYPOINT) $(SDL2_FRAMEWORK_MACOS)
 	@mkdir -p $(OBJDIR_MACOS)
 	$(CC) $(CC_SDL2_OPTIONS_MACOS) -I/usr/local/include/quickjs -c -o $@ $(C_ENTRYPOINT)
 

@@ -1,0 +1,23 @@
+{
+  "name": "gawain",
+  "version": "0.0.0",
+  "description": "### Mac OS X ```sh npm install brew install quickjs make ```",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "quickjs-static": "^0.190810.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lindenbark/gawain.git"
+  },
+  "author": "Team Lindenbark",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lindenbark/gawain/issues"
+  },
+  "homepage": "https://github.com/lindenbark/gawain#readme"
+}
