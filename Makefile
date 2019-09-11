@@ -27,7 +27,7 @@ CC_MACOS_OPTIONS = $(CC_SDL2_OPTIONS_MACOS) $(CC_QUICKJS_OPTIONS_MACOS)
 CC_WINDOWS_OPTIONS = -static $(CC_SDL2_OPTIONS_WINDOWS) $(CC_QUICKJS_OPTIONS_WINDOWS)
 
 .PHONY: all
-all: clean macos # windows
+all: clean macos windows
 
 .PHONY: clean
 clean:
@@ -44,6 +44,8 @@ macos: $(BIN_MACOS)
 
 .PHONY: windows
 windows: $(BIN_WINDOWS)
+	@mkdir -p $(DIST)
+	cp $(BIN_WINDOWS) $(DIST)/gawain.exe
 
 $(BIN_MACOS): $(ENTRYPOINT_MACOS) $(patsubst src/native/binding/%.c, $(OBJDIR_MACOS)/%.o, $(NATIVE_BINDINGS))
 	@mkdir -p $(TMP)/macos
@@ -59,7 +61,7 @@ $(OBJDIR_MACOS)/%.o: src/native/binding/%.c $(SDL2_FRAMEWORK_MACOS)
 
 $(BIN_WINDOWS): $(ENTRYPOINT_WINDOWS) $(patsubst src/native/binding/%.c, $(OBJDIR_WINDOWS)/%.o, $(NATIVE_BINDINGS))
 	@mkdir -p $(TMP)/windows
-	$(CC_WINDOWS) $(CC_WINDOWS_OPTIONS) -o $@ $^
+	$(CC_WINDOWS) -o $@ $^ $(CC_WINDOWS_OPTIONS)
 
 $(ENTRYPOINT_WINDOWS): $(JS_ENTRYPOINT) $(C_ENTRYPOINT) $(SDL2_MINGW_WINDOWS) $(DOCKCROSS_WINDOWS)
 	@mkdir -p $(OBJDIR_WINDOWS)
