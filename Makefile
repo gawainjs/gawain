@@ -2,6 +2,7 @@ TMP = tmp
 DIST = dist
 OBJDIR_MACOS = tmp/macos/.obj
 OBJDIR_WINDOWS = tmp/windows/.obj
+QUICKJS_STATIC = node_modules/quickjs-static
 GENERATED = src/generated
 ENTRYPOINT_MACOS = $(OBJDIR_MACOS)/entrypoint.o
 ENTRYPOINT_WINDOWS = $(OBJDIR_WINDOWS)/entrypoint.o
@@ -19,19 +20,19 @@ CC_WINDOWS = $(DOCKCROSS_WINDOWS) x86_64-w64-mingw32.static-gcc
 SDL2_CONFIG_WINDOWS = $(DOCKCROSS_WINDOWS) $(SDL2_MINGW_WINDOWS)/bin/sdl2-config
 CC_SDL2_OPTIONS_MACOS = -rpath @executable_path/../Frameworks -F $(TMP) -framework SDL2
 CC_SDL2_OPTIONS_WINDOWS = -I$(SDL2_MINGW_WINDOWS)/include/SDL2 -L$(SDL2_MINGW_WINDOWS)/lib $(shell $(SDL2_CONFIG_WINDOWS) --static-libs)
-CC_QUICKJS_PATH_MACOS = node_modules/quickjs-static/bin/macos/quickjs-$(QUICKJS_VERSION)
-CC_QUICKJS_PATH_WINDOWS = node_modules/quickjs-static/bin/windows/quickjs-$(QUICKJS_VERSION)
+CC_QUICKJS_PATH_MACOS = $(QUICKJS_STATIC)/bin/macos/quickjs-$(QUICKJS_VERSION)
+CC_QUICKJS_PATH_WINDOWS = $(QUICKJS_STATIC)/bin/windows/quickjs-$(QUICKJS_VERSION)
 CC_QUICKJS_OPTIONS_MACOS = -I$(CC_QUICKJS_PATH_MACOS) -L$(CC_QUICKJS_PATH_MACOS) -lquickjs
 CC_QUICKJS_OPTIONS_WINDOWS = -I$(CC_QUICKJS_PATH_WINDOWS) -L$(CC_QUICKJS_PATH_WINDOWS) -lquickjs
 CC_MACOS_OPTIONS = $(CC_SDL2_OPTIONS_MACOS) $(CC_QUICKJS_OPTIONS_MACOS)
 CC_WINDOWS_OPTIONS = -static $(CC_SDL2_OPTIONS_WINDOWS) $(CC_QUICKJS_OPTIONS_WINDOWS)
 
 .PHONY: all
-all: clean macos windows
+all: macos windows
 
 .PHONY: clean
 clean:
-	-@$(RM) -rf $(TMP) $(DIST) $(OBJDIR_MACOS) $(OBJDIR_WINDOWS) $(GENERATED)
+	-@$(RM) -rf $(TMP) $(DIST) $(GENERATED)
 
 .PHONY: macos
 macos: $(BIN_MACOS)
@@ -71,9 +72,12 @@ $(OBJDIR_WINDOWS)/%.o: src/native/binding/%.c $(SDL2_MINGW_WINDOWS) $(DOCKCROSS_
 	@mkdir -p $(OBJDIR_WINDOWS)
 	$(CC_WINDOWS) $(CC_WINDOWS_OPTIONS) -c -o $@ $<
 
-$(JS_ENTRYPOINT): src/entrypoint.js
+$(JS_ENTRYPOINT): src/entrypoint.js $(QUICKJS_STATIC)
 	@mkdir -p $(GENERATED)
-	qjsc -c -m -M sdl.so,sdl -o $@ src/entrypoint.js
+	npx qjsc -c -m -M sdl.so,sdl -o $@ src/entrypoint.js
+
+$(QUICKJS_STATIC):
+	npm install
 
 $(SDL2_FRAMEWORK_MACOS):
 	@mkdir -p $(TMP)

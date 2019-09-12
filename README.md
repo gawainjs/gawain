@@ -1,9 +1,17 @@
-## how to build
+# gawain
+lightweight cross platform native desktop application framework
 
-### Mac OS X
+## supported platform
+- 64-bit windows
+- 64-bit macos
+
+##  how to build
 ```sh
-npm install
-brew cask install docker
-brew install quickjs
+git clone git@github.com:lindenbark/gawain.git
+cd gawain
 make
 ```
+### prerequisite
+- macos
+- docker
+- nodejs
