@@ -5,7 +5,7 @@
   "main": "index.js",
   "dependencies": {},
   "devDependencies": {
-    "quickjs-static": "^0.190810.2"
+    "quickjs-static": "^0.190810.3"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
