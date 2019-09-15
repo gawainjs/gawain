@@ -9,14 +9,18 @@ ENTRYPOINT_WINDOWS = $(OBJDIR_WINDOWS)/entrypoint.o
 C_ENTRYPOINT = src/native/entrypoint.c
 JS_ENTRYPOINT = $(GENERATED)/js-entrypoint.c
 NATIVE_BINDINGS = $(wildcard src/native/binding/*.c)
+OBJFILES_MACOS = $(ENTRYPOINT_MACOS) $(patsubst src/native/binding/%.c, $(OBJDIR_MACOS)/%.o, $(NATIVE_BINDINGS)) $(OBJDIR_MACOS)/miniz.o
+OBJFILES_WINDOWS = $(ENTRYPOINT_WINDOWS) $(patsubst src/native/binding/%.c, $(OBJDIR_WINDOWS)/%.o, $(NATIVE_BINDINGS)) $(OBJDIR_WINDOWS)/miniz.o
 BIN_MACOS = $(TMP)/macos/app
 BIN_WINDOWS = $(TMP)/windows/app
 BIN_DEV_MACOS = $(TMP)/macos/app-dev
 SDL2_VERSION = 2.0.10
+MINIZ_VERSION = 2.1.0
 QUICKJS_VERSION = 2019-08-10
 DOCKCROSS_WINDOWS = $(TMP)/dockcross-win
 SDL2_FRAMEWORK_MACOS = $(TMP)/SDL2.framework
 SDL2_MINGW_WINDOWS = $(TMP)/SDL2-$(SDL2_VERSION)/x86_64-w64-mingw32
+MINIZ = $(TMP)/miniz
 CC_WINDOWS = $(DOCKCROSS_WINDOWS) x86_64-w64-mingw32.static-gcc
 SDL2_CONFIG_WINDOWS = $(DOCKCROSS_WINDOWS) $(SDL2_MINGW_WINDOWS)/bin/sdl2-config
 CC_SDL2_OPTIONS_MACOS = -rpath @executable_path/../Frameworks -F $(TMP) -framework SDL2
@@ -54,11 +58,11 @@ windows: $(BIN_WINDOWS)
 	@mkdir -p $(DIST)
 	cp $(BIN_WINDOWS) $(DIST)/gawain.exe
 
-$(BIN_MACOS): $(ENTRYPOINT_MACOS) $(patsubst src/native/binding/%.c, $(OBJDIR_MACOS)/%.o, $(NATIVE_BINDINGS))
+$(BIN_MACOS): $(OBJFILES_MACOS)
 	@mkdir -p $(TMP)/macos
 	$(CC) $(CC_MACOS_OPTIONS) -o $@ $^
 
-$(BIN_DEV_MACOS): $(ENTRYPOINT_MACOS) $(patsubst src/native/binding/%.c, $(OBJDIR_MACOS)/%.o, $(NATIVE_BINDINGS))
+$(BIN_DEV_MACOS): $(OBJFILES_MACOS)
 	@mkdir -p $(TMP)/macos
 	$(CC) $(CC_SDL2_DEV_OPTIONS_MACOS) $(CC_MACOS_OPTIONS) -o $@ $^
 
@@ -70,7 +74,11 @@ $(OBJDIR_MACOS)/%.o: src/native/binding/%.c $(SDL2_FRAMEWORK_MACOS)
 	@mkdir -p $(OBJDIR_MACOS)
 	$(CC) $(CC_MACOS_OPTIONS) -c -o $@ $<
 
-$(BIN_WINDOWS): $(ENTRYPOINT_WINDOWS) $(patsubst src/native/binding/%.c, $(OBJDIR_WINDOWS)/%.o, $(NATIVE_BINDINGS))
+$(OBJDIR_MACOS)/%.o: $(MINIZ)/%.c $(SDL2_FRAMEWORK_MACOS)
+	@mkdir -p $(OBJDIR_MACOS)
+	$(CC) $(CC_MACOS_OPTIONS) -c -o $@ $<
+
+$(BIN_WINDOWS): $(OBJFILES_WINDOWS)
 	@mkdir -p $(TMP)/windows
 	$(CC_WINDOWS) -o $@ $^ $(CC_WINDOWS_OPTIONS)
 
@@ -79,6 +87,10 @@ $(ENTRYPOINT_WINDOWS): $(JS_ENTRYPOINT) $(C_ENTRYPOINT) $(SDL2_MINGW_WINDOWS) $(
 	$(CC_WINDOWS) $(CC_WINDOWS_OPTIONS) -c -o $@ $(C_ENTRYPOINT)
 
 $(OBJDIR_WINDOWS)/%.o: src/native/binding/%.c $(SDL2_MINGW_WINDOWS) $(DOCKCROSS_WINDOWS)
+	@mkdir -p $(OBJDIR_WINDOWS)
+	$(CC_WINDOWS) $(CC_WINDOWS_OPTIONS) -c -o $@ $<
+
+$(OBJDIR_WINDOWS)/%.o: $(MINIZ)/%.c $(SDL2_MINGW_WINDOWS) $(DOCKCROSS_WINDOWS)
 	@mkdir -p $(OBJDIR_WINDOWS)
 	$(CC_WINDOWS) $(CC_WINDOWS_OPTIONS) -c -o $@ $<
 
@@ -100,6 +112,11 @@ $(SDL2_MINGW_WINDOWS):
 	@mkdir -p $(TMP)
 	curl -o "$(TMP)/sdl2-win.tar.gz" https://www.libsdl.org/release/SDL2-devel-$(SDL2_VERSION)-mingw.tar.gz
 	tar -zxvf "$(TMP)/sdl2-win.tar.gz" -C $(TMP)
+
+$(MINIZ):
+	@mkdir -p $(TMP)
+	curl -L -o $(TMP)/miniz.zip https://github.com/richgel999/miniz/releases/download/$(MINIZ_VERSION)/miniz-$(MINIZ_VERSION).zip
+	unzip -d $@ $(TMP)/miniz.zip
 
 $(DOCKCROSS_WINDOWS):
 	@mkdir -p $(TMP)
