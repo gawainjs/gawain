@@ -11,6 +11,7 @@ JS_ENTRYPOINT = $(GENERATED)/js-entrypoint.c
 NATIVE_BINDINGS = $(wildcard src/native/binding/*.c)
 BIN_MACOS = $(TMP)/macos/app
 BIN_WINDOWS = $(TMP)/windows/app
+BIN_DEV_MACOS = $(TMP)/macos/app-dev
 SDL2_VERSION = 2.0.10
 QUICKJS_VERSION = 2019-08-10
 DOCKCROSS_WINDOWS = $(TMP)/dockcross-win
@@ -19,6 +20,7 @@ SDL2_MINGW_WINDOWS = $(TMP)/SDL2-$(SDL2_VERSION)/x86_64-w64-mingw32
 CC_WINDOWS = $(DOCKCROSS_WINDOWS) x86_64-w64-mingw32.static-gcc
 SDL2_CONFIG_WINDOWS = $(DOCKCROSS_WINDOWS) $(SDL2_MINGW_WINDOWS)/bin/sdl2-config
 CC_SDL2_OPTIONS_MACOS = -rpath @executable_path/../Frameworks -F $(TMP) -framework SDL2
+CC_SDL2_DEV_OPTIONS_MACOS = -rpath @executable_path/..
 CC_SDL2_OPTIONS_WINDOWS = -I$(SDL2_MINGW_WINDOWS)/include/SDL2 -L$(SDL2_MINGW_WINDOWS)/lib $(shell $(SDL2_CONFIG_WINDOWS) --static-libs)
 CC_QUICKJS_PATH_MACOS = $(QUICKJS_STATIC)/bin/macos/quickjs-$(QUICKJS_VERSION)
 CC_QUICKJS_PATH_WINDOWS = $(QUICKJS_STATIC)/bin/windows/quickjs-$(QUICKJS_VERSION)
@@ -33,6 +35,10 @@ all: macos windows
 .PHONY: clean
 clean:
 	-@$(RM) -rf $(TMP) $(DIST) $(GENERATED)
+
+.PHONY: dev
+dev: $(BIN_DEV_MACOS)
+	$(BIN_DEV_MACOS)
 
 .PHONY: macos
 macos: $(BIN_MACOS)
@@ -51,6 +57,10 @@ windows: $(BIN_WINDOWS)
 $(BIN_MACOS): $(ENTRYPOINT_MACOS) $(patsubst src/native/binding/%.c, $(OBJDIR_MACOS)/%.o, $(NATIVE_BINDINGS))
 	@mkdir -p $(TMP)/macos
 	$(CC) $(CC_MACOS_OPTIONS) -o $@ $^
+
+$(BIN_DEV_MACOS): $(ENTRYPOINT_MACOS) $(patsubst src/native/binding/%.c, $(OBJDIR_MACOS)/%.o, $(NATIVE_BINDINGS))
+	@mkdir -p $(TMP)/macos
+	$(CC) $(CC_SDL2_DEV_OPTIONS_MACOS) $(CC_MACOS_OPTIONS) -o $@ $^
 
 $(ENTRYPOINT_MACOS): $(JS_ENTRYPOINT) $(C_ENTRYPOINT) $(SDL2_FRAMEWORK_MACOS)
 	@mkdir -p $(OBJDIR_MACOS)
