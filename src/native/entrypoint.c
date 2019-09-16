@@ -7,6 +7,7 @@
 #else
     #include "SDL.h"
 #endif
+#include "miniz.h"
 // #include "quickjs-libc.h"
 
 // #include "../generated/js-entrypoint.c"
@@ -18,6 +19,20 @@ int main(int argc, char* argv[]) {
     printf("%s\n", tmp);
     printf("%i\n", size);
     free(tmp);
+    { // zip test
+        mz_zip_archive zip_archive;
+        mz_zip_archive_file_stat file_stat;
+        size_t uncomp_size;
+        char *file;
+        memset(&zip_archive, 0, sizeof(zip_archive));
+        mz_zip_reader_init_file(&zip_archive, "tmp/test.zip", 0);
+        mz_zip_reader_file_stat(&zip_archive, 0, &file_stat);
+        file = mz_zip_reader_extract_file_to_heap(&zip_archive, file_stat.m_filename, &uncomp_size, 0);
+        printf("%s\n", file_stat.m_filename);
+        printf("%s\n", file);
+        mz_free(file);
+        mz_zip_reader_end(&zip_archive);
+    }
     // JSRuntime *rt;
     // JSContext *ctx;
     // rt = JS_NewRuntime();
