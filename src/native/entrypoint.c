@@ -1,23 +1,33 @@
 #include <stdlib.h>
 #include <stdio.h>
-#if defined __APPLE__ && defined __MACH__
+#ifndef PATH_MAX
     #define PATH_MAX 4096
+#endif
+#if defined __APPLE__ && defined __MACH__
     #include <mach-o/dyld.h>
+#elif defined MINGW
+    #include "libloaderapi.h"
 #endif
 #include "miniz.h"
 #include "quickjs-libc.h"
 
 char* get_gawain_archive_path() {
-    char *tmp = malloc(PATH_MAX);
+    char *tmp;
     #if defined GAWAIN_DEV
+        tmp = malloc(PATH_MAX);
         strcpy(tmp, "tmp/test.zip");
     #elif defined __APPLE__ && defined __MACH__
+        tmp = malloc(PATH_MAX);
         uint32_t size = PATH_MAX;
         _NSGetExecutablePath(tmp, &size);
         strcat(tmp, "/../../Resources/archive.zip");
         char *tmp2 = realpath(tmp, NULL);
         free(tmp);
         tmp = tmp2;
+    #elif defined MINGW
+        DWORD path[MAX_PATH];
+        GetModuleFileNameW(NULL, path, PATH_MAX);
+        tmp = (char*) path;
     #endif
     return tmp;
 }
