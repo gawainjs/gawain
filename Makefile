@@ -55,11 +55,14 @@ $(TEST_ZIP):
 	popd;
 
 .PHONY: macos
-macos: $(BIN_MACOS)
+macos: $(BIN_MACOS) $(TEST_ZIP)
+	-@$(RM) -rf $(DIST)/gawain.app
 	@mkdir -p $(DIST)
 	cp -R dev/gawain.app $(DIST)/gawain.app
 	@mkdir -p $(DIST)/gawain.app/Contents/MacOS
 	cp $(BIN_MACOS) $(DIST)/gawain.app/Contents/MacOS/app
+	@mkdir -p $(DIST)/gawain.app/Contents/Resources
+	cp $(TEST_ZIP) $(DIST)/gawain.app/Contents/Resources/archive.zip
 	@mkdir -p $(DIST)/gawain.app/Contents/Frameworks
 	cp -R $(SDL2_FRAMEWORK_MACOS) $(DIST)/gawain.app/Contents/Frameworks/SDL2.framework
 

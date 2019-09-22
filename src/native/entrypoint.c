@@ -14,6 +14,10 @@ char* get_gawain_archive_path() {
     #elif defined __APPLE__ && defined __MACH__
         uint32_t size = PATH_MAX;
         _NSGetExecutablePath(tmp, &size);
+        strcat(tmp, "/../../Resources/archive.zip");
+        char *tmp2 = realpath(tmp, NULL);
+        free(tmp);
+        tmp = tmp2;
     #endif
     return tmp;
 }
