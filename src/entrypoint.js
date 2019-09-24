@@ -136,7 +136,7 @@ function renderPlayer(x, y) {
 }
 
 function renderBall(x, y) {
-    sdl.SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xff);
+    sdl.SDL_SetRenderDrawColor(renderer, 0xab, 0xcd, 0xef, 0xff);
     sdl.SDL_RenderFillRect(renderer, { x, y, w: ballSize, h: ballSize });
 }
 

@@ -16,9 +16,10 @@ BIN_MACOS = $(TMP)/macos/app
 BIN_WINDOWS = $(TMP)/windows/app
 BIN_DEV_MACOS = $(TMP)/macos/app-dev
 TEST_ZIP = $(TMP)/test.zip
+TEST_ZIP_FIXTURE = $(TMP)/fixture/zip
 SDL2_VERSION = 2.0.10
 MINIZ_VERSION = 2.1.0
-QUICKJS_VERSION = 2019-08-10
+QUICKJS_VERSION = 2019-09-18
 DOCKCROSS_WINDOWS = $(TMP)/dockcross-win
 SDL2_FRAMEWORK_MACOS = $(TMP)/SDL2.framework
 SDL2_MINGW_WINDOWS = $(TMP)/SDL2-$(SDL2_VERSION)/x86_64-w64-mingw32
@@ -48,9 +49,9 @@ dev: $(BIN_DEV_MACOS) $(TEST_ZIP)
 	$(BIN_DEV_MACOS)
 
 .ONESHELL:
-$(TEST_ZIP):
+$(TEST_ZIP): $(TEST_ZIP_FIXTURE)/entrypoint
 	ZIP=$(shell pwd)/$@;\
-	pushd src/test/fixture/zip;\
+	pushd $(TEST_ZIP_FIXTURE);\
 	zip $$ZIP entrypoint;\
 	popd;
 
@@ -110,6 +111,10 @@ $(OBJDIR_WINDOWS)/%.o: src/native/binding/%.c $(SDL2_MINGW_WINDOWS) $(DOCKCROSS_
 $(OBJDIR_WINDOWS)/miniz.o: $(MINIZ) $(SDL2_MINGW_WINDOWS) $(DOCKCROSS_WINDOWS)
 	@mkdir -p $(OBJDIR_WINDOWS)
 	$(CC_WINDOWS) $(CC_WINDOWS_OPTIONS) -c -o $@ $(MINIZ)/miniz.c
+
+$(TEST_ZIP_FIXTURE)/entrypoint: $(JS_ENTRYPOINT)
+	@mkdir -p $(TEST_ZIP_FIXTURE)
+	node --experimental-modules src/test/generate-js-entrypoint-binary.mjs
 
 $(JS_ENTRYPOINT): src/entrypoint.js $(QUICKJS_STATIC)
 	@mkdir -p $(GENERATED)

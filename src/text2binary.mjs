@@ -2,10 +2,10 @@
  * @param qjscOutput {string}
  * @returns {Uint8Array}
 */
-export default function text2bytes(qjscOutput) {
-    const [, bytesText] = /\{((?:.|\r|\n)+?)\}/.exec(qjscOutput);
+export default function text2binary(qjscOutput) {
+    const [, binaryText] = /\{((?:.|\r|\n)+?)\}/.exec(qjscOutput);
     return new Uint8Array(
-        bytesText
+        binaryText
             .split(',')
             .filter(text => !!text.trim())
             .map(text => parseInt(text.trim()))
