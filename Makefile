@@ -15,6 +15,7 @@ OBJFILES_WINDOWS = $(patsubst src/native/binding/%.c, $(OBJDIR_WINDOWS)/%.o, $(N
 BIN_MACOS = $(TMP)/macos/app
 BIN_WINDOWS = $(TMP)/windows/app
 BIN_DEV_MACOS = $(TMP)/macos/app-dev
+BIN_DEV_WINDOWS = $(TMP)/windows/app-dev
 TEST_ZIP = $(TMP)/test.zip
 TEST_ZIP_FIXTURE = $(TMP)/fixture/zip
 SDL2_VERSION = 2.0.10
@@ -47,6 +48,11 @@ clean:
 .PHONY: dev
 dev: $(BIN_DEV_MACOS) $(TEST_ZIP)
 	$(BIN_DEV_MACOS)
+
+.PHONY: dev-windows
+dev-windows: $(BIN_DEV_WINDOWS) $(TEST_ZIP)
+	cp $(BIN_DEV_WINDOWS) $(TMP)/gawain-dev.exe
+	cat $(TEST_ZIP) >> $(TMP)/gawain-dev.exe
 
 .ONESHELL:
 $(TEST_ZIP): $(TEST_ZIP_FIXTURE)/entrypoint
@@ -99,6 +105,10 @@ $(OBJDIR_MACOS)/miniz.o: $(MINIZ) $(SDL2_FRAMEWORK_MACOS)
 $(BIN_WINDOWS): $(ENTRYPOINT_WINDOWS) $(OBJFILES_WINDOWS)
 	@mkdir -p $(TMP)/windows
 	$(CC_WINDOWS) -o $@ $^ $(CC_WINDOWS_OPTIONS)
+
+$(BIN_DEV_WINDOWS): $(ENTRYPOINT_WINDOWS) $(OBJFILES_WINDOWS)
+	@mkdir -p $(TMP)/windows
+	$(CC_WINDOWS) -o $@ $^ $(CC_WINDOWS_OPTIONS) -mconsole
 
 $(ENTRYPOINT_WINDOWS): $(JS_ENTRYPOINT) $(C_ENTRYPOINT) $(SDL2_MINGW_WINDOWS) $(MINIZ) $(DOCKCROSS_WINDOWS)
 	@mkdir -p $(OBJDIR_WINDOWS)
