@@ -26,24 +26,17 @@ char *gawain_get_archive_path() {
         free(tmp);
         tmp = tmp2;
     #elif defined __MINGW64__
-        WCHAR path[MAX_PATH];
-        GetModuleFileNameW(NULL, path, MAX_PATH);
-        tmp = (char*) path;
+        tmp = malloc(MAX_PATH * sizeof(WCHAR));
+        GetModuleFileNameW(NULL, (WCHAR*) tmp, MAX_PATH);
     #endif
     return tmp;
 }
 
 #ifdef __MINGW64__
-int gawain_parse_exe_overlay(WCHAR *exe_path, size_t *overlay_offset, size_t *overlay_size) {
-    FILE *fp;
-    int err = _wfopen_s(&fp, exe_path, L"r");
-    if (err) return err;
-    fseek(fp, 0L, SEEK_END);
-    long exe_size = ftell(fp);
+int gawain_parse_exe_overlay(FILE *fp, DWORD *overlay_offset) {
     fseek(fp, 0L, SEEK_SET);
     char exe_header[4096];
     fread(&exe_header, sizeof(exe_header), 1, fp);
-    fclose(fp);
     IMAGE_DOS_HEADER *dos_header = (IMAGE_DOS_HEADER*) exe_header;
     IMAGE_NT_HEADERS *pe_header = (IMAGE_NT_HEADERS*) ((BYTE*) dos_header - 1 + dos_header->e_lfanew);
     IMAGE_SECTION_HEADER *section_table = (IMAGE_SECTION_HEADER*) ((BYTE*) pe_header + sizeof(IMAGE_NT_HEADERS));
@@ -53,8 +46,7 @@ int gawain_parse_exe_overlay(WCHAR *exe_path, size_t *overlay_offset, size_t *ov
         max_pointer = section_table->PointerToRawData;
         real_exe_size = section_table->PointerToRawData + section_table->SizeOfRawData;
     }
-    *overlay_offset = (size_t) real_exe_size;
-    *overlay_size = (size_t) (exe_size - real_exe_size);
+    *overlay_offset = real_exe_size;
     return 0;
 }
 #endif
@@ -62,17 +54,13 @@ int gawain_parse_exe_overlay(WCHAR *exe_path, size_t *overlay_offset, size_t *ov
 int gawain_init_archive(mz_zip_archive *gawain_archive) {
     char *archive_path = gawain_get_archive_path();
     #if defined __MINGW64__
-        size_t overlay_offset, overlay_size;
-        gawain_parse_exe_overlay((WCHAR*) archive_path, &overlay_offset, &overlay_size);
+        FILE *fp;
+        DWORD overlay_offset;
+        _wfopen_s(&fp, (WCHAR*) archive_path, L"r");
+        gawain_parse_exe_overlay(fp, &overlay_offset);
         printf("overlay offset: %i\n", overlay_offset);
-        printf("overlay size: %i\n", overlay_size);
-        mz_zip_reader_init_file_v2(
-            gawain_archive,
-            archive_path,
-            0,
-            (mz_uint64) overlay_offset,
-            (mz_uint64) overlay_size
-        );
+        fseek(fp, overlay_offset, SEEK_SET);
+        mz_zip_reader_init_cfile(gawain_archive, fp, 0, 0);
     #else
         mz_zip_reader_init_file(gawain_archive, archive_path, 0);
     #endif
@@ -85,7 +73,10 @@ int main(int argc, char *argv[]) {
     size_t entrypoint_size;
     uint8_t *entrypoint;
     memset(&gawain_archive, 0, sizeof(gawain_archive));
-    gawain_init_archive(&gawain_archive);
+    mz_bool is_init_archive_success = gawain_init_archive(&gawain_archive);
+    if (!is_init_archive_success) {
+        printf("gawain_init_archive failed: %s\n", mz_zip_get_error_string(gawain_archive.m_last_error));
+    }
     entrypoint = mz_zip_reader_extract_file_to_heap(&gawain_archive, "entrypoint", &entrypoint_size, 0);
     printf("entrypoint size: %i\n", (int) entrypoint_size);
     mz_zip_reader_end(&gawain_archive);
