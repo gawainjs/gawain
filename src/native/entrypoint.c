@@ -67,16 +67,8 @@ int gawain_init_archive(mz_zip_archive *gawain_archive) {
         DWORD overlay_offset;
         _wfopen_s(&fp, (WCHAR*) archive_path, L"rb");
         gawain_parse_exe_overlay(fp, &overlay_offset);
-        /*
         fseek(fp, overlay_offset, SEEK_SET);
         mz_zip_reader_init_cfile(gawain_archive, fp, 0, 0);
-        /*/
-        char *overlay;
-        DWORD overlay_size;
-        gawain_read_exe_overlay(fp, overlay_offset, &overlay, &overlay_size);
-        fclose(fp);
-        result = (int) mz_zip_reader_init_mem(gawain_archive, overlay, (size_t) overlay_size, 0);
-        //*/
     #else
         result = (int) mz_zip_reader_init_file(gawain_archive, archive_path, 0);
     #endif
