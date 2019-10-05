@@ -3,12 +3,12 @@ DIST = dist
 OBJDIR_MACOS = tmp/macos/.obj
 OBJDIR_WINDOWS = tmp/windows/.obj
 QUICKJS_STATIC = node_modules/quickjs-static
-GENERATED = src/generated
+GENERATED_FOR_TEST = src/test/generated
 ENTRYPOINT_MACOS = $(OBJDIR_MACOS)/entrypoint.o
 ENTRYPOINT_DEV_MACOS = $(OBJDIR_MACOS)/entrypoint-dev.o
 ENTRYPOINT_WINDOWS = $(OBJDIR_WINDOWS)/entrypoint.o
 C_ENTRYPOINT = src/native/entrypoint.c
-JS_ENTRYPOINT = $(GENERATED)/js-entrypoint.c
+JS_ENTRYPOINT_FOR_TEST = $(GENERATED_FOR_TEST)/js-entrypoint.c
 NATIVE_BINDINGS = $(wildcard src/native/binding/*.c)
 OBJFILES_MACOS = $(patsubst src/native/binding/%.c, $(OBJDIR_MACOS)/%.o, $(NATIVE_BINDINGS)) $(OBJDIR_MACOS)/miniz.o
 OBJFILES_WINDOWS = $(patsubst src/native/binding/%.c, $(OBJDIR_WINDOWS)/%.o, $(NATIVE_BINDINGS)) $(OBJDIR_WINDOWS)/miniz.o
@@ -43,7 +43,7 @@ all: macos windows
 
 .PHONY: clean
 clean:
-	-@$(RM) -rf $(TMP) $(DIST) $(GENERATED)
+	-@$(RM) -rf $(TMP) $(DIST) $(GENERATED_FOR_TEST)
 
 .PHONY: dev
 dev: $(BIN_DEV_MACOS) $(TEST_ZIP)
@@ -86,11 +86,11 @@ $(BIN_DEV_MACOS): $(ENTRYPOINT_DEV_MACOS) $(OBJFILES_MACOS)
 	@mkdir -p $(TMP)/macos
 	$(CC) $(CC_SDL2_DEV_OPTIONS_MACOS) $(CC_MACOS_OPTIONS) -o $@ $^
 
-$(ENTRYPOINT_MACOS): $(JS_ENTRYPOINT) $(C_ENTRYPOINT) $(SDL2_FRAMEWORK_MACOS) $(MINIZ)
+$(ENTRYPOINT_MACOS): $(JS_ENTRYPOINT_FOR_TEST) $(C_ENTRYPOINT) $(SDL2_FRAMEWORK_MACOS) $(MINIZ)
 	@mkdir -p $(OBJDIR_MACOS)
 	$(CC) $(CC_MACOS_OPTIONS) -c -o $@ $(C_ENTRYPOINT)
 
-$(ENTRYPOINT_DEV_MACOS): $(JS_ENTRYPOINT) $(C_ENTRYPOINT) $(SDL2_FRAMEWORK_MACOS) $(MINIZ)
+$(ENTRYPOINT_DEV_MACOS): $(JS_ENTRYPOINT_FOR_TEST) $(C_ENTRYPOINT) $(SDL2_FRAMEWORK_MACOS) $(MINIZ)
 	@mkdir -p $(OBJDIR_MACOS)
 	$(CC) $(CC_MACOS_OPTIONS) -DGAWAIN_DEV -c -o $@ $(C_ENTRYPOINT)
 
@@ -112,7 +112,7 @@ $(BIN_DEV_WINDOWS): $(ENTRYPOINT_WINDOWS) $(OBJFILES_WINDOWS)
 	$(CC_WINDOWS) -o $@ $^ $(CC_WINDOWS_OPTIONS) -mconsole
 	upx --overlay=strip $@
 
-$(ENTRYPOINT_WINDOWS): $(JS_ENTRYPOINT) $(C_ENTRYPOINT) $(SDL2_MINGW_WINDOWS) $(MINIZ) $(DOCKCROSS_WINDOWS)
+$(ENTRYPOINT_WINDOWS): $(JS_ENTRYPOINT_FOR_TEST) $(C_ENTRYPOINT) $(SDL2_MINGW_WINDOWS) $(MINIZ) $(DOCKCROSS_WINDOWS)
 	@mkdir -p $(OBJDIR_WINDOWS)
 	$(CC_WINDOWS) $(CC_WINDOWS_OPTIONS) -c -o $@ $(C_ENTRYPOINT)
 
@@ -124,13 +124,13 @@ $(OBJDIR_WINDOWS)/miniz.o: $(MINIZ) $(SDL2_MINGW_WINDOWS) $(DOCKCROSS_WINDOWS)
 	@mkdir -p $(OBJDIR_WINDOWS)
 	$(CC_WINDOWS) $(CC_WINDOWS_OPTIONS) -c -o $@ $(MINIZ)/miniz.c
 
-$(TEST_ZIP_FIXTURE)/entrypoint: $(JS_ENTRYPOINT)
+$(TEST_ZIP_FIXTURE)/entrypoint: $(JS_ENTRYPOINT_FOR_TEST)
 	@mkdir -p $(TEST_ZIP_FIXTURE)
 	node --experimental-modules src/test/generate-js-entrypoint-binary.mjs
 
-$(JS_ENTRYPOINT): src/entrypoint.js $(QUICKJS_STATIC)
-	@mkdir -p $(GENERATED)
-	npx qjsc -c -m -M sdl.so,sdl -o $@ src/entrypoint.js
+$(JS_ENTRYPOINT_FOR_TEST): src/test/entrypoint.mjs $(QUICKJS_STATIC)
+	@mkdir -p $(GENERATED_FOR_TEST)
+	npx qjsc -c -m -M sdl.so,sdl -o $@ src/test/entrypoint.mjs
 
 $(QUICKJS_STATIC):
 	npm install
