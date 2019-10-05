@@ -1,6 +1,8 @@
 # gawain
 lightweight cross platform native desktop application framework
 
+NOTE: this project is highly experimental for now. use at your own risk.
+
 ## supported platform
 - 64-bit windows
 - 64-bit macos

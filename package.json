@@ -1,10 +1,13 @@
 {
   "name": "gawain",
   "version": "0.0.0",
-  "description": "### Mac OS X ```sh npm install brew install quickjs make ```",
-  "main": "index.js",
-  "dependencies": {},
+  "description": "lightweight crossplatform desktop application framework",
+  "bin": "src/cli/entrypoint.mjs",
+  "dependencies": {
+    "yargs": "^14.0.0"
+  },
   "devDependencies": {
+    "@types/yargs": "^13.0.3",
     "quickjs-static": "0.190918.0"
   },
   "scripts": {
