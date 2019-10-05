@@ -4,11 +4,16 @@
   "description": "lightweight crossplatform desktop application framework",
   "bin": "src/cli/entrypoint.mjs",
   "dependencies": {
+    "make-dir": "^3.0.0",
+    "request": "^2.88.0",
+    "unzipper": "^0.10.5",
     "yargs": "^14.0.0"
   },
   "devDependencies": {
+    "@types/request": "^2.48.3",
+    "@types/unzipper": "^0.10.0",
     "@types/yargs": "^13.0.3",
-    "quickjs-static": "0.190918.0"
+    "quickjs-static": "0.190918.2"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
