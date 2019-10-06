@@ -1,0 +1,10 @@
+.DS_Store
+/.git
+/node_modules
+
+/.vscode
+/dev
+/dist
+/src/native
+/src/test
+/tmp
