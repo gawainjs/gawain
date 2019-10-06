@@ -72,6 +72,7 @@ macos: $(BIN_MACOS) $(TEST_ZIP)
 	cp $(TEST_ZIP) $(DIST)/gawain.app/Contents/Resources/archive.zip
 	@mkdir -p $(DIST)/gawain.app/Contents/Frameworks
 	cp -R $(SDL2_FRAMEWORK_MACOS) $(DIST)/gawain.app/Contents/Frameworks/SDL2.framework
+	pushd $(DIST) && tar cvf gawain.app.tar gawain.app && popd
 
 .PHONY: windows
 windows: $(BIN_WINDOWS)

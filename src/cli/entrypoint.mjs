@@ -1,25 +1,34 @@
 #!/usr/bin/env node --experimental-modules
 
 import path from 'path';
-import { promises as fs } from 'fs';
+import {
+    promises as fs,
+    createReadStream,
+    createWriteStream,
+} from 'fs';
+import { pipeline } from 'stream';
+import { promisify } from 'util';
 
 import yargs from 'yargs';
 import makeDir from 'make-dir';
+import archiver from 'archiver';
 import qjsc from 'quickjs-static/qjsc.js';
 
 import text2binary from '../text2binary.mjs';
 import {
     checkGawainBinaryAlreadyExists,
     installGawainBinary,
+    publishGawainBinary,
 } from './gawain-binary.mjs';
+
+const pipelineAsync = promisify(pipeline);
 
 yargs
     .scriptName('gawain')
     .usage('Usage: $0 <cmd> [args]')
-    .command('build [entrypoint]', 'build gawain application', yargs => {
+    .command('build <entrypoint>', 'build gawain application', yargs => {
         yargs.positional('entrypoint', {
             type: 'string',
-            default: './src/index.js',
             describe: 'entrypoint module of application'
         });
         yargs.option('t', {
@@ -47,6 +56,7 @@ yargs
     }, async ({ entrypoint, targets, out, tmp, binaryVersion }) => {
         const qjscOutPath = path.join(tmp, 'entrypoint.c');
         const qjscOutBinaryPath = path.join(tmp, 'entrypoint');
+        const archivePath = path.join(tmp, 'archive.zip');
         await Promise.all([ makeDir(out), makeDir(tmp) ]);
         await step(1, 'compile user code with quickjs', async () => {
             await qjsc([ '-c', '-m', '-M', 'sdl.so,sdl', '-o', qjscOutPath, entrypoint ]);
@@ -57,14 +67,25 @@ yargs
             const qjscOutBinary = text2binary(await fs.readFile(qjscOutPath, 'utf-8'));
             await fs.writeFile(qjscOutBinaryPath, qjscOutBinary);
         });
-        await step(3, 'download gawain binaries', async () => {
+        await step(3, 'zip user code', async () => {
+            const archive = archiver('zip', { zlib: { level: 9 } });
+            archive.append(createReadStream(qjscOutBinaryPath), { name: 'entrypoint' });
+            archive.finalize();
+            await pipelineAsync(
+                archive,
+                createWriteStream(archivePath),
+            );
+        });
+        await step(4, 'download gawain binaries', async () => {
             await Promise.all(targets.map(async targetPlatform => {
                 if (await checkGawainBinaryAlreadyExists(tmp, targetPlatform, binaryVersion)) return;
                 await installGawainBinary(tmp, targetPlatform, binaryVersion);
             }));
         });
-        await step(4, 'merge results on dist folder', async () => {
-            // TODO
+        await step(5, 'merge results on dist folder', async () => {
+            await Promise.all(targets.map(async targetPlatform => {
+                await publishGawainBinary(out, tmp, targetPlatform, binaryVersion);
+            }));
         });
     })
     .demandCommand(1)

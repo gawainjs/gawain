@@ -1,22 +1,24 @@
-import { promises as fs, createWriteStream } from 'fs';
+import {
+    promises as fs,
+    createReadStream,
+    createWriteStream,
+} from 'fs';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
+import os from 'os';
 import path from 'path';
 
+import cpx from 'cpx';
+import tar from 'tar';
 import makeDir from 'make-dir';
 import request from 'request';
-import unzipper from 'unzipper';
 
 const pipelineAsync = promisify(pipeline);
+const copyAsync = promisify(cpx.copy);
 
 const gawainBinaryNames = {
-    macos: 'gawain.app',
+    macos: 'gawain.app.tar',
     windows: 'gawain.exe',
-};
-
-const zipMap = {
-    macos: true,
-    windows: false,
 };
 
 /**
@@ -43,15 +45,40 @@ export async function installGawainBinary(tmpDir, platform, version) {
     const installDirectory = getGawainBinaryInstallDirectory(tmpDir, version);
     const installPath = getGawainBinaryInstallPath(tmpDir, platform, version);
     await makeDir(installDirectory);
-    if (zipMap[platform]) {
+    await pipelineAsync(
+        request(downloadUrl),
+        createWriteStream(installPath),
+    );
+}
+
+/**
+ * @param distDir {string}
+ * @param tmpDir {string}
+ * @param platform {'macos' | 'windows'}
+ * @param version {string | undefined}
+*/
+export async function publishGawainBinary(distDir, tmpDir, platform, version) {
+    const binaryName = gawainBinaryNames[platform];
+    const installPath = getGawainBinaryInstallPath(tmpDir, platform, version);
+    const targetPath = path.join(distDir, binaryName);
+    const archivePath = path.join(tmpDir, 'archive.zip');
+    await copyAsync(installPath, distDir, { clean: true });
+    if (platform === 'macos') {
+        await tar.replace({
+            file: targetPath,
+            cwd: tmpDir,
+            prefix: 'gawain.app/Contents/Resources',
+        }, ['archive.zip']);
+        if (os.platform() !== 'win32') {
+            await tar.extract({
+                file: targetPath,
+                cwd: distDir,
+            });
+        }
+    } else { // windows
         await pipelineAsync(
-            request(downloadUrl),
-            unzipper.Extract({ path: installDirectory }),
-        );
-    } else {
-        await pipelineAsync(
-            request(downloadUrl),
-            createWriteStream(installPath),
+            createReadStream(archivePath),
+            createWriteStream(targetPath, { flags: 'a' }),
         );
     }
 }
@@ -61,7 +88,7 @@ export async function installGawainBinary(tmpDir, platform, version) {
  * @param version {string | undefined}
 */
 function getGawainBinaryDownloadUrl(platform, version) {
-    return getGawainBinaryDownloadUrlPrefix(version) + gawainBinaryNames[platform] + (zipMap[platform] ? '.zip' : '');
+    return getGawainBinaryDownloadUrlPrefix(version) + gawainBinaryNames[platform];
 }
 
 /**
