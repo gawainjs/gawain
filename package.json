@@ -1,12 +1,13 @@
 {
   "name": "gawain",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "lightweight crossplatform desktop application framework",
   "bin": "src/cli/entrypoint.mjs",
   "dependencies": {
     "archiver": "^3.1.1",
     "cpx": "^1.5.0",
     "make-dir": "^3.0.0",
+    "quickjs-static": "0.190918.3",
     "request": "^2.88.0",
     "tar": "^5.0.5",
     "yargs": "^14.0.0"
@@ -16,8 +17,7 @@
     "@types/cpx": "^1.5.0",
     "@types/request": "^2.48.3",
     "@types/tar": "^4.0.3",
-    "@types/yargs": "^13.0.3",
-    "quickjs-static": "0.190918.3"
+    "@types/yargs": "^13.0.3"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
