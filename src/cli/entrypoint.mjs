@@ -15,6 +15,7 @@ import archiver from 'archiver';
 import qjsc from 'quickjs-static/qjsc.js';
 
 import text2binary from '../text2binary.mjs';
+import bundle from './bundle.mjs';
 import {
     checkGawainBinaryAlreadyExists,
     installGawainBinary,
@@ -54,20 +55,28 @@ yargs
             describe: 'gawain binary version',
         });
     }, async ({ entrypoint, targets, out, tmp, binaryVersion }) => {
+        const bundlePath = path.join(tmp, 'bundle');
         const qjscOutPath = path.join(tmp, 'entrypoint.c');
         const qjscOutBinaryPath = path.join(tmp, 'entrypoint');
         const archivePath = path.join(tmp, 'archive.zip');
         await Promise.all([ makeDir(out), makeDir(tmp) ]);
-        await step(1, 'compile user code with quickjs', async () => {
-            await qjsc([ '-c', '-m', '-M', 'sdl.so,sdl', '-o', qjscOutPath, entrypoint ]);
-        }, ({ stderr }) => {
+        let i = 0;
+        await step(++i, 'bundle user code with rollup', async () => {
+            await makeDir(bundlePath);
+            await bundle(entrypoint, bundlePath);
+        });
+        await step(++i, 'compile user code with quickjs', async () => {
+            const bundleEntrypointPath = path.join(bundlePath, 'entrypoint.js');
+            await qjsc([ '-c', '-m', '-M', 'sdl.so,sdl', '-o', qjscOutPath, bundleEntrypointPath ]);
+        }, ({ stdout, stderr }) => {
+            process.stderr.write(stdout);
             process.stderr.write(stderr);
         });
-        await step(2, 'make user code binary from text', async () => {
+        await step(++i, 'make user code binary from text', async () => {
             const qjscOutBinary = text2binary(await fs.readFile(qjscOutPath, 'utf-8'));
             await fs.writeFile(qjscOutBinaryPath, qjscOutBinary);
         });
-        await step(3, 'zip user code', async () => {
+        await step(++i, 'zip user code', async () => {
             const archive = archiver('zip', { zlib: { level: 9 } });
             archive.append(createReadStream(qjscOutBinaryPath), { name: 'entrypoint' });
             archive.finalize();
@@ -76,13 +85,13 @@ yargs
                 createWriteStream(archivePath),
             );
         });
-        await step(4, 'download gawain binaries', async () => {
+        await step(++i, 'download gawain binaries', async () => {
             await Promise.all(targets.map(async targetPlatform => {
                 if (await checkGawainBinaryAlreadyExists(tmp, targetPlatform, binaryVersion)) return;
                 await installGawainBinary(tmp, targetPlatform, binaryVersion);
             }));
         });
-        await step(5, 'merge results on dist folder', async () => {
+        await step(++i, 'merge results on dist folder', async () => {
             await Promise.all(targets.map(async targetPlatform => {
                 await publishGawainBinary(out, tmp, targetPlatform, binaryVersion);
             }));
