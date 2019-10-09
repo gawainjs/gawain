@@ -65,7 +65,7 @@ yargs
             await makeDir(bundlePath);
             await bundle(entrypoint, bundlePath);
         });
-        await step(++i, 'compile user code with quickjs', async () => {
+        await step(++i, 'compile user code with qjsc', async () => {
             const bundleEntrypointPath = path.join(bundlePath, 'entrypoint.js');
             await qjsc([ '-c', '-m', '-M', 'sdl.so,sdl', '-o', qjscOutPath, bundleEntrypointPath ]);
         }, ({ stdout, stderr }) => {

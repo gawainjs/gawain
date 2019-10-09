@@ -1,6 +1,6 @@
 {
   "name": "gawain",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "lightweight crossplatform desktop application framework",
   "bin": "src/cli/entrypoint.mjs",
   "dependencies": {
@@ -10,6 +10,8 @@
     "quickjs-static": "0.190918.3",
     "request": "^2.88.0",
     "rollup": "^1.23.1",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
     "tar": "^5.0.5",
     "yargs": "^14.0.0"
   },
