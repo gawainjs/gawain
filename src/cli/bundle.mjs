@@ -4,6 +4,7 @@ import path from 'path';
 import rollup from 'rollup';
 import nodeResolvePlugin from 'rollup-plugin-node-resolve';
 import commonjsPlugin from 'rollup-plugin-commonjs';
+import typescriptPlugin from 'rollup-plugin-typescript';
 
 export default async function bundle(input, bundlePath) {
     const bundle = await rollup.rollup({ input, plugins, external: gawainBuiltins });
@@ -28,5 +29,9 @@ const plugins = [
     commonjsPlugin({
         include: /node_modules/,
         extensions: ['.js', '.cjs'],
+    }),
+    typescriptPlugin({
+        module: 'esnext',
+        target: 'es2020',
     }),
 ];
