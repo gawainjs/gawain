@@ -8,7 +8,7 @@ const ballSize = 20;
 
 sdl.SDL_Init(sdl.SDL_INIT_VIDEO);
 sdl.SDL_SetHint(sdl.SDL_HINT_RENDER_VSYNC, '1');
-const windowId = sdl.SDL_CreateWindow(
+const window = sdl.SDL_CreateWindow(
     'Hello',
     sdl.SDL_WINDOWPOS_UNDEFINED,
     sdl.SDL_WINDOWPOS_UNDEFINED,
@@ -16,7 +16,7 @@ const windowId = sdl.SDL_CreateWindow(
     stageHeight,
     sdl.SDL_WINDOW_OPENGL
 );
-console.log('windowId:', windowId);
+console.log('windowId:', window.id);
 
 const numkeys = { current: 0 };
 const keyboardState = new Uint8Array(sdl.SDL_GetKeyboardState(numkeys));

@@ -5,3 +5,5 @@
 /.obj
 /node_modules
 /src/generated
+/src/native/binding/*.c
+/src/test/generated

@@ -153,6 +153,13 @@ $(MINIZ):
 	curl -L -o $(TMP)/miniz.zip https://github.com/richgel999/miniz/releases/download/$(MINIZ_VERSION)/miniz-$(MINIZ_VERSION).zip
 	unzip -d $@ $(TMP)/miniz.zip
 
+src/native/binding/%.c: src/native/binding/%.c.mjs
+	# qjs prints an uncaught exception to stdout...
+	qjs -m $< > $@ || { ERR=$$?; sed '/^Throw:/h;//!H;$$!d;x' $@; exit $$ERR; }
+
+src/native/binding/%.c.mjs: src/native/binding/%.c.in
+	qjs -m src/native/codegen/gen.mjs $< > $@
+
 $(DOCKCROSS_WINDOWS):
 	@mkdir -p $(TMP)
 	docker run --rm dockcross/windows-static-x64 > $(DOCKCROSS_WINDOWS)
